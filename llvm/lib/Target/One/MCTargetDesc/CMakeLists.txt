@@ -1,5 +1,5 @@
-add_llvm_component_library(LLVMCpu0Desc
-        Cpu0MCTargetDesc.cpp
+add_llvm_component_library(LLVMOneDesc
+        OneMCTargetDesc.cpp
 
         LINK_COMPONENTS
         CodeGenTypes

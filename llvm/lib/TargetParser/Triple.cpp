@@ -51,7 +51,7 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
   case mips64el:       return "mips64el";
   case mips:           return "mips";
   case mipsel:         return "mipsel";
-  case cpu0:           return "cpu0";
+  case one:            return "one" ;
   case msp430:         return "msp430";
   case nvptx64:        return "nvptx64";
   case nvptx:          return "nvptx";
@@ -195,7 +195,7 @@ StringRef Triple::getArchTypePrefix(ArchType Kind) {
   case mips64:
   case mips64el:    return "mips";
 
-  case cpu0:        return "cpu0";
+  case one:         return "one" ;
 
   case hexagon:     return "hexagon";
 
@@ -954,7 +954,7 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
   case Triple::mips64:
   case Triple::mips64el:
   case Triple::mips:
-  case Triple::cpu0:
+  case Triple::one: 
   case Triple::msp430:
   case Triple::nvptx64:
   case Triple::nvptx:
@@ -1666,7 +1666,7 @@ unsigned Triple::getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
   case llvm::Triple::m68k:
   case llvm::Triple::mips:
   case llvm::Triple::mipsel:
-  case llvm::Triple::cpu0:
+  case llvm::Triple::one: 
   case llvm::Triple::nvptx:
   case llvm::Triple::ppc:
   case llvm::Triple::ppcle:
@@ -1777,7 +1777,7 @@ Triple Triple::get32BitArchVariant() const {
   case Triple::m68k:
   case Triple::mips:
   case Triple::mipsel:
-  case Triple::cpu0:
+  case Triple::one: 
   case Triple::nvptx:
   case Triple::ppc:
   case Triple::ppcle:

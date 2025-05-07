@@ -13,8 +13,8 @@ Target &llvm::getTheOneTarget() {
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeOneTargetInfo() {
   RegisterTarget<Triple::one,
-                 /*HasJIT=*/true>
-      X(getTheOneTarget(), "one", "One (32-bit big endian)", "One");
+                 /*HasJIT=*/false>
+      X(getTheOneTarget(), "one", "One (32-bit little endian)", "One");
 
 
 }

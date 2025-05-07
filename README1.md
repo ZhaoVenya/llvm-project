@@ -12,4 +12,38 @@
 
 >>>>>>>> 这个是生成riscv32汇编文件的指令(在one_chip_software_test目录下运行)
 >>>>>>>>../build/bin/llc -march=riscv32 build/obj/main.ll -o main.asm
+>>>>>>>> .vscode folder has a launch.json, the code here is:
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Debug llc with RISC-V",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}/build/bin/llc",
+                "args": [
+                    "-march=one",
+                    "-O0",
+                    "-filetype=asm",
+                    "${workspaceFolder}/one_chip_software_test/build/obj/main.ll",
+                    "-o",
+                    "-",
+                    "--debug"
+                ],
+                "stopAtEntry": false,
+                "cwd": "${workspaceFolder}",
+                "environment": [],
+                "externalConsole": false,
+                "MIMode": "gdb",
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ]
+            }
+        ]
+    }
+
 

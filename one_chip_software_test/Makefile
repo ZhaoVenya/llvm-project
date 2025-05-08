@@ -20,7 +20,7 @@ LLVM_LL := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.ll,$(SRCS))
 TARGET := $(BIN_DIR)/program
 
 # 编译选项
-CXXFLAGS := -I$(INC_DIR) -Wall -Wextra -O3
+CXXFLAGS := -I$(INC_DIR) -Wall -Wextra -O0
 LDFLAGS := -fuse-ld=$(shell pwd)/../build/bin/ld.lld
 
 # 默认目标
@@ -45,7 +45,7 @@ $(OBJ_DIR)/%.bc: $(SRC_DIR)/%.c | $(OBJ_DIR)
 		$(CXX) -I$(INC_DIR) -emit-llvm -c $< -o $@
 
 $(OBJ_DIR)/%.ll: $(SRC_DIR)/%.c | $(OBJ_DIR)
-		$(CXX) -O0 -S -emit-llvm $< -o $@
+		$(CXX) -O0 -target riscv32-unknown-elf -march=rv32imafdc -mabi=ilp32d -S -emit-llvm $< -o $@
 
 # 创建必要的目录
 $(BIN_DIR):

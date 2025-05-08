@@ -5,5 +5,6 @@ add_llvm_component_library(LLVMOneDesc
         CodeGenTypes
         MC
         Support
+        CodeGen
 
 )

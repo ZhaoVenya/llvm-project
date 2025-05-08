@@ -7,6 +7,7 @@
 #include "OneTargetMachine.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/TargetParser/Triple.h"
 
 #define DEBUG_TYPE "one"
 
@@ -14,7 +15,7 @@ using namespace llvm;
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeOneTarget() {
 //    extern Target TheFooTarget;
-   RegisterTargetMachine<OneTargetMachine> X(getTheOneTarget);
+   RegisterTargetMachine<OneTargetMachine> X(getTheOneTarget());
 
 }
 
@@ -36,7 +37,7 @@ return RM.value_or(Reloc::Static);
 
 OneTargetMachine::OneTargetMachine(const Target &T, const Triple &TT, StringRef CPU, StringRef FS,
     const TargetOptions &Options, std::optional<Reloc::Model> RM,
-    std::optional<CodeModel::Model> CM, CodeGenOptLevel OL, bool JIT) : LLVMTargetMachine\
+    std::optional<CodeModel::Model> CM, CodeGenOptLevel OL, bool JIT) : CodeGenTargetMachineImpl
     (T, computeDataLayout(TT, Options), TT, CPU, FS, Options, 
     getEffectiveRelocModel(TT, RM),
     getEffectiveCodeModel(CM, CodeModel::Small), OL),

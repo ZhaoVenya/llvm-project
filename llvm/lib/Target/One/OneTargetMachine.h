@@ -2,10 +2,11 @@
 #define ONETARGETMACHINE_H
 
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/CodeGen/CodeGenTargetMachineImpl.h"
 
 namespace llvm {
 
-    class OneTargetMachine : public LLVMTargetMachine {
+    class OneTargetMachine : public CodeGenTargetMachineImpl {
         std::unique_ptr<TargetLoweringObjectFile> TLOF;
 
         public:

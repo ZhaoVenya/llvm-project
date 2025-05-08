@@ -10,4 +10,8 @@ add_llvm_target(OneCodeGen
         Support
         OneInfo
         OneDesc
+        CodeGen
+        Target
+        CodeGenTypes
+        TargetParser
 )

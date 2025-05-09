@@ -23,7 +23,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeOneTarget() {
 static StringRef computeDataLayout(const Triple &TT,
     const TargetOptions &Options){
 
-        assert(TT.isArch32Bit() && "Only 32bit currently supported");
+    assert(TT.isArch32Bit() && "Only 32bit currently supported");
 
   return "e-m:e-p:32:32-i64:64-n32-S128";
         

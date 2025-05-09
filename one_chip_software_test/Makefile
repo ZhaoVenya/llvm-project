@@ -45,7 +45,7 @@ $(OBJ_DIR)/%.bc: $(SRC_DIR)/%.c | $(OBJ_DIR)
 		$(CXX) -I$(INC_DIR) -emit-llvm -c $< -o $@
 
 $(OBJ_DIR)/%.ll: $(SRC_DIR)/%.c | $(OBJ_DIR)
-		$(CXX) -O0 -target riscv32-unknown-elf -march=rv32imafdc -mabi=ilp32d -S -emit-llvm $< -o $@
+		$(CXX) -target riscv32-unknown-elf -march=rv32imafdc -mabi=ilp32d -O0 -S -emit-llvm $< -o $@ #
 
 # 创建必要的目录
 $(BIN_DIR):

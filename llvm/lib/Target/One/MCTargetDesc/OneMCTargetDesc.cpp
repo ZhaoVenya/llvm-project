@@ -3,6 +3,9 @@
 //
 
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/MC/MCRegister.h"
+#include "llvm/MC/MCSubtargetInfo.h"
+#include "llvm/MC/MCInstrInfo.h"
 #include "OneMCTargetDesc.h"
 #include "OneMCAsmInfo.h"
 #include "../TargetInfo/OneTargetInfo.h"
@@ -10,35 +13,38 @@
 
 using namespace llvm;
 
-static MCAsmInfo *createOneMCAsmInfo(const MCRegisterInfo &MRI,
-                                       const Triple &TT,
-                                       const MCTargetOptions &Options) {
-    
-    return new OneMCAsmInfo(TT);
-
+MCAsmInfo *createOneMCAsmInfo(const MCRegisterInfo &MRI, const Triple &TT,
+                              const MCTargetOptions &Options) {
+  return new OneMCAsmInfo(TT);
 }
 
 
-
-static MCInstrInfo *createOneMCInstrInfo() {
-
+MCRegisterInfo *createOneMCRegisterInfo(const Triple &TT) {
+  MCRegisterInfo *X = new MCRegisterInfo();
+  InitOneMCRegisterInfo(X, One::RA);
+  return X;
 }
 
-
-static MCRegisterInfo * createOneMCRegisterInfo(const Triple &TT){
-
-
-
+MCInstrInfo *createOneMCInstrInfo() {
+  MCInstrInfo *X = new MCInstrInfo();
+  InitOneMCInstrInfo(X);
+  return X;
 }
 
-static MCSubtargetInfo * createOneMCSubtargetInfo(const Triple &TT,
-                        StringRef CPU, StringRef FS){
-
-
+MCInstPrinter *createOneMCInstPrinter(const Triple &T, unsigned SyntaxVariant,
+                                      const MCAsmInfo &MAI,
+                                      const MCInstrInfo &MII,
+                                      const MCRegisterInfo &MRI) {
+  return new OneInstPrinter(MAI, MII, MRI);
 }
 
-
-
+MCSubtargetInfo *createOneMCSubtargetInfo(const Triple &TT, StringRef CPU,
+                                          StringRef FS) {
+  if (CPU.empty()) {
+    CPU = "one";
+  }
+  return createOneMCSubtargetInfoImpl(TT, CPU, CPU, FS);
+}
 
 
 

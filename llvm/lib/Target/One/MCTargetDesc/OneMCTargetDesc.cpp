@@ -6,12 +6,15 @@
 #include "OneMCTargetDesc.h"
 #include "OneMCAsmInfo.h"
 #include "OneTargetInfo.h"
+#include "OneMCAsmInfo.h"
 
 using namespace llvm;
 
 static MCAsmInfo *createOneMCAsmInfo(const MCRegisterInfo &MRI,
                                        const Triple &TT,
                                        const MCTargetOptions &Options) {
+    
+    return new OneMCAsmInfo(TT);
 
 }
 

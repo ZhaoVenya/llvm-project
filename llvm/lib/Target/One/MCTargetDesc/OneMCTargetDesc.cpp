@@ -5,7 +5,7 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "OneMCTargetDesc.h"
 #include "OneMCAsmInfo.h"
-#include "OneTargetInfo.h"
+#include "../TargetInfo/OneTargetInfo.h"
 #include "OneMCAsmInfo.h"
 
 using namespace llvm;

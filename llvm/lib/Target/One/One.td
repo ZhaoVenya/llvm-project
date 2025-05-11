@@ -4,7 +4,7 @@ include "OneInstrInfo.td"
 include "OneCallingConv.td"
 
 
-def ProcessorModel<"generic", NoSchedModel, []>;
+def ProcessorModel : ProcessorModel<"one", NoSchedModel, []>;
 
 def OneInstrInfo : InstrInfo;
 

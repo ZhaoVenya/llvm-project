@@ -9,9 +9,26 @@
 #include "OneMCTargetDesc.h"
 #include "OneMCAsmInfo.h"
 #include "../TargetInfo/OneTargetInfo.h"
+#include "OneInstrInfo.h"
 #include "OneMCAsmInfo.h"
+#include "OneSubtarget.h"
+#include "OneRegisterInfo.h"
+
 
 using namespace llvm;
+
+#define GET_INSTRINFO_MC_DESC
+#include "OneGenInstrInfo.inc"
+
+
+#define GET_SUBTARGETINFO_MC_DESC
+#include "OneGenSubtargetInfo.inc"
+
+
+#define GET_REGINFO_MC_DESC
+#include "OneGenRegisterInfo.inc"
+
+
 
 MCAsmInfo *createOneMCAsmInfo(const MCRegisterInfo &MRI, const Triple &TT,
                               const MCTargetOptions &Options) {
@@ -21,7 +38,8 @@ MCAsmInfo *createOneMCAsmInfo(const MCRegisterInfo &MRI, const Triple &TT,
 
 MCRegisterInfo *createOneMCRegisterInfo(const Triple &TT) {
   MCRegisterInfo *X = new MCRegisterInfo();
-  InitOneMCRegisterInfo(X, One::RA);
+  InitOneMCRegisterInfo(X, One::X1);
+
   return X;
 }
 
@@ -31,16 +49,19 @@ MCInstrInfo *createOneMCInstrInfo() {
   return X;
 }
 
-MCInstPrinter *createOneMCInstPrinter(const Triple &T, unsigned SyntaxVariant,
-                                      const MCAsmInfo &MAI,
-                                      const MCInstrInfo &MII,
-                                      const MCRegisterInfo &MRI) {
-  return new OneInstPrinter(MAI, MII, MRI);
-}
+
+// MCInstPrinter *createOneMCInstPrinter(const Triple &T, unsigned SyntaxVariant,
+//                                       const MCAsmInfo &MAI,
+//                                       const MCInstrInfo &MII,
+//                                       const MCRegisterInfo &MRI) {
+//   return new OneInstPrinter(MAI, MII, MRI);
+// }
+
+
 
 MCSubtargetInfo *createOneMCSubtargetInfo(const Triple &TT, StringRef CPU,
                                           StringRef FS) {
-  if (CPU.empty()) {
+  if (CPU.empty() || CPU=="generic") {
     CPU = "one";
   }
   return createOneMCSubtargetInfoImpl(TT, CPU, CPU, FS);

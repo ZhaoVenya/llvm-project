@@ -14,6 +14,11 @@ add_public_tablegen_target(OneCommonTableGen)
 
 add_llvm_target(OneCodeGen
         OneTargetMachine.cpp
+        OneInstrInfo.cpp
+        OneRegisterInfo.cpp
+        OneSubtarget.cpp
+        OneFrameLowering.cpp
+        
 
         LINK_COMPONENTS
         AsmPrinter

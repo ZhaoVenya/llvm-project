@@ -1,3 +1,7 @@
+
+
+
+
 #ifndef ONEMCASMINFO_H
 #define ONEMCASMINFO_H
 
@@ -7,7 +11,6 @@ namespace llvm{
 
     class Triple;
     class OneMCAsmInfo:public MCAsmInfoELF{
-    
     public:
         explicit OneMCAsmInfo(const Triple &TargetTriple);
 

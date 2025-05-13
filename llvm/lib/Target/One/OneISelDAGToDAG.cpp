@@ -1,6 +1,7 @@
 
 
 #include "llvm/CodeGen/SelectionDAGISel.h"
+#include <memory>
 #include "OneTargetMachine.h"
 #include "OneSubtarget.h"
 #include "MCTargetDesc/OneMCTargetDesc.h"
@@ -36,7 +37,7 @@ public:
     void Select(SDNode *N) override;
 
 
-}
+};
 
 
 bool OneDAGToDAGISel::runOnMachineFunction(MachineFunction &MF) {
@@ -60,8 +61,13 @@ class OneDAGToDAGISelLegacy : public SelectionDAGISelLegacy {
 public:
   static char ID;
   explicit OneDAGToDAGISelLegacy(OneTargetMachine &TM)
-      : SelectionDAGISelLegacy(ID, std:: <OneDAGToDAGISel>(TM)) {}
+      : SelectionDAGISelLegacy(ID, std::make_unique<OneDAGToDAGISel>(TM)) {}
 };
+
+
+char OneDAGToDAGISelLegacy::ID;
+
+INITIALIZE_PASS(OneDAGToDAGISelLegacy, DEBUG_TYPE, PASS_NAME, false, false)
 
 
 /// This pass converts a legalized DAG into a M68k-specific DAG,
@@ -70,7 +76,4 @@ FunctionPass *llvm::createOneISelDag(OneTargetMachine &TM) {
   return new OneDAGToDAGISelLegacy(TM);
 }
 
-char OneDAGToDAGISelLegacy::ID;
-
-INITIALIZE_PASS(OneDAGToDAGISelLegacy, DEBUG_TYPE, PASS_NAME, false, false)
 

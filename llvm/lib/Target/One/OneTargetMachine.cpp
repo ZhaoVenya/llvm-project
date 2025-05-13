@@ -2,12 +2,12 @@
 // Created by zhaowenya on 25-5-6.
 //
 
-#include "llvm/MC/TargetRegistry.h"
-#include "TargetInfo/OneTargetInfo.h"
 #include "OneTargetMachine.h"
+#include "One.h"
+#include "TargetInfo/OneTargetInfo.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
-#include "llvm/Target/TargetMachine.h"
-#include "llvm/TargetParser/Triple.h"
+#include "llvm/CodeGen/TargetPassConfig.h"
+#include "llvm/MC/TargetRegistry.h"
 
 #define DEBUG_TYPE "one"
 
@@ -16,6 +16,10 @@ using namespace llvm;
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeOneTarget() {
 //    extern Target TheFooTarget;
    RegisterTargetMachine<OneTargetMachine> X(getTheOneTarget());
+
+   auto *PR = PassRegistry::getPassRegistry();
+
+   initializeOneDAGToDAGISelLegacyPass(*PR);
 
 }
 
@@ -51,3 +55,38 @@ OneTargetMachine::OneTargetMachine(const Target &T, const Triple &TT,
 
 }
  
+
+namespace  {
+    class OnePassConfig : public TargetPassConfig{
+        public:
+            OnePassConfig(OneTargetMachine &TM, PassManagerBase &PM) 
+            : TargetPassConfig(TM, PM){
+
+            }
+
+            OneTargetMachine &getOneTargetMachine() const {
+                return getTM<OneTargetMachine>();
+            }
+
+            const OneSubtarget &getOneSubtarget() const{
+                return *getOneTargetMachine().getSubtargetImpl();
+            }
+
+            bool addInstSelector() override;
+    };
+
+}
+
+TargetPassConfig *OneTargetMachine::createPassConfig(PassManagerBase &PM){
+    return new OnePassConfig(*this, PM);
+}
+
+
+bool OnePassConfig::addInstSelector(){
+    addPass(createOneISelDag(getOneTargetMachine()));
+    // addPass(createOneGlobalBaseRegPass());
+    return false;
+}
+
+
+

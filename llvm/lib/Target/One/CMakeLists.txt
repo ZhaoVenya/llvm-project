@@ -3,6 +3,7 @@ add_llvm_component_group(One)
 set(LLVM_TARGET_DEFINITIONS One.td)
 
 tablegen(LLVM OneGenAsmWriter.inc -gen-asm-writer)
+tablegen(LLVM OneGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM OneGenCallingConv.inc -gen-callingconv)
 tablegen(LLVM OneGenInstrInfo.inc -gen-instr-info)
 tablegen(LLVM OneGenRegisterInfo.inc -gen-register-info)
@@ -19,6 +20,7 @@ add_llvm_target(OneCodeGen
         OneSubtarget.cpp
         OneFrameLowering.cpp
         OneISelLowering.cpp
+        OneISelDAGToDAG.cpp
         
 
         LINK_COMPONENTS

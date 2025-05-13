@@ -61,7 +61,7 @@ MCInstrInfo *createOneMCInstrInfo() {
 
 MCSubtargetInfo *createOneMCSubtargetInfo(const Triple &TT, StringRef CPU,
                                           StringRef FS) {
-  if (CPU.empty() || CPU=="generic") {
+  if (CPU.empty()) {
     CPU = "one";
   }
   return createOneMCSubtargetInfoImpl(TT, CPU, CPU, FS);

@@ -25,7 +25,7 @@ OneSubtarget &OneSubtarget::initializeSubtargetDependencies(StringRef CPU, Strin
                                                             
 {
 
-    if(CPU.empty() || CPU=="generic"){
+    if(CPU.empty()){
         CPU = "one";
     }
     ParseSubtargetFeatures(CPU, CPU, FS);

@@ -27,6 +27,10 @@ namespace llvm {
             {
                 return &Subtarget;
             }
+
+            // Pass Pipeline Configuration
+            TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+
     };
     
     

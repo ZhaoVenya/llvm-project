@@ -13,7 +13,7 @@ using namespace llvm;
 
 OneSubtarget::OneSubtarget(const Triple &TT, 
     StringRef CPU, StringRef FS, const TargetMachine &TM) : 
-    OneGenSubtargetInfo(TT, CPU, CPU, FS), FrameLowering(*this), TLInfo(TM, *this)
+    OneGenSubtargetInfo(TT, CPU, CPU, FS), RegInfo(*this), FrameLowering(*this), TLInfo(TM, *this)
 {
 
 

@@ -3,8 +3,10 @@
 
 #include "OneInstrInfo.h"
 #include "OneRegisterInfo.h"
-#include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "OneFrameLowering.h"
+#include "OneISelLowering.h"
+#include "llvm/CodeGen/SelectionDAGTargetInfo.h"
+
 
 #define GET_SUBTARGETINFO_HEADER
 #include "OneGenSubtargetInfo.inc"
@@ -36,7 +38,7 @@ namespace llvm
             const TargetFrameLowering *getFrameLowering() const override{
                 return &FrameLowering;
             }
-
+            const TargetLowering *getTargetLowering() const override {return &TLInfo;}
             void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
 
 

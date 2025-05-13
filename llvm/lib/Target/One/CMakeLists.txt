@@ -18,6 +18,7 @@ add_llvm_target(OneCodeGen
         OneRegisterInfo.cpp
         OneSubtarget.cpp
         OneFrameLowering.cpp
+        OneISelLowering.cpp
         
 
         LINK_COMPONENTS
@@ -26,7 +27,7 @@ add_llvm_target(OneCodeGen
         CodeGenTypes
         Core
         MC
-        SlectionDAG
+        SelectionDAG
         OneDesc
         OneInfo
         Support

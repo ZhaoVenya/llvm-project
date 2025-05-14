@@ -56,3 +56,11 @@
     define i32 @main() #0 {
     ret i32 42
     }
+
+>>>>>>>> 在llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp的4389行添加了下边的代码，
+>>>>>>>> 全局搜索“must be return false, modified by zhaowenya”查看修改了什么：
+    if (!&TSI) {
+      //// must be return false, modified by zhaowenya
+      return false;
+    }
+

@@ -4386,6 +4386,10 @@ bool SelectionDAGISel::mayRaiseFPException(SDNode *N) const {
   // exception.
   if (N->isTargetOpcode()) {
     const SelectionDAGTargetInfo &TSI = CurDAG->getSelectionDAGInfo();
+    if (!&TSI) {
+      //// must be return false, modified by zhaowenya
+      return false;
+    }
     return TSI.mayRaiseFPException(N->getOpcode());
   }
   return N->isStrictFPOpcode();

@@ -35,16 +35,16 @@ static StringRef computeDataLayout(const Triple &TT,
 
 static Reloc::Model getEffectiveRelocModel(const Triple &TT,
     std::optional<Reloc::Model> RM) {
-return RM.value_or(Reloc::Static);
+    return RM.value_or(Reloc::Static);
 }
 
 
 OneTargetMachine::OneTargetMachine(const Target &T, const Triple &TT, 
-    StringRef CPU, StringRef FS,
-    const TargetOptions &Options, 
-    std::optional<Reloc::Model> RM,
-    std::optional<CodeModel::Model> CM, 
-    CodeGenOptLevel OL, bool JIT) 
+                                    StringRef CPU, StringRef FS,
+                                    const TargetOptions &Options, 
+                                    std::optional<Reloc::Model> RM,
+                                    std::optional<CodeModel::Model> CM, 
+                                    CodeGenOptLevel OL, bool JIT) 
     : CodeGenTargetMachineImpl(T, computeDataLayout(TT, Options), TT, CPU, FS, Options, 
                             getEffectiveRelocModel(TT, RM),
                             getEffectiveCodeModel(CM, CodeModel::Small), OL),

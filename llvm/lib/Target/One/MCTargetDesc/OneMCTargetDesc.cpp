@@ -13,6 +13,7 @@
 #include "OneMCAsmInfo.h"
 #include "OneSubtarget.h"
 #include "OneRegisterInfo.h"
+#include "OneInstPrinter.h"
 
 
 using namespace llvm;
@@ -50,12 +51,6 @@ MCInstrInfo *createOneMCInstrInfo() {
 }
 
 
-// MCInstPrinter *createOneMCInstPrinter(const Triple &T, unsigned SyntaxVariant,
-//                                       const MCAsmInfo &MAI,
-//                                       const MCInstrInfo &MII,
-//                                       const MCRegisterInfo &MRI) {
-//   return new OneInstPrinter(MAI, MII, MRI);
-// }
 
 
 
@@ -68,6 +63,12 @@ MCSubtargetInfo *createOneMCSubtargetInfo(const Triple &TT, StringRef CPU,
 }
 
 
+MCInstPrinter *createOneMCInstPrinter(const Triple &T, unsigned SyntaxVariant,
+                                      const MCAsmInfo &MAI,
+                                      const MCInstrInfo &MII,
+                                      const MCRegisterInfo &MRI) {
+  return new OneInstPrinter(MAI, MII, MRI);
+}
 
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeOneTargetMC() {
@@ -76,5 +77,6 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeOneTargetMC() {
     TargetRegistry::RegisterMCInstrInfo(getTheOneTarget(), createOneMCInstrInfo);
     TargetRegistry::RegisterMCRegInfo(getTheOneTarget(), createOneMCRegisterInfo);
     TargetRegistry::RegisterMCSubtargetInfo(getTheOneTarget(), createOneMCSubtargetInfo);
+    TargetRegistry::RegisterMCInstPrinter(getTheOneTarget(), createOneMCInstPrinter);
 
 }

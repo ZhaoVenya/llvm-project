@@ -1,6 +1,8 @@
-#include <stdint.h>
+#include "stdio.h"
 // #include <stdio.h>
 
 int main(){
-    return 21;
+
+    printf("hello riscv!\n");
+    return 0;
 }

@@ -75,5 +75,5 @@ pythonenv*
 /lldb/docs/python_api/
 
 # ignore one_chip_software_test/build folder
-one_chip_software_test/build/
+# one_chip_software_test/build/
 one_chip_software_test/*.asm

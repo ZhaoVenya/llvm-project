@@ -2,6 +2,9 @@
 CXX := ../build/bin/clang
 LLVM_LINK := ../build/bin/llvm-link
 LLVM_OPT := ../build/bin/opt
+LLC = ../build/bin/llc
+MAIN1 = main1
+MAIN = main
 
 # 项目目录结构
 BUILD_DIR := build
@@ -54,9 +57,32 @@ $(BIN_DIR):
 $(OBJ_DIR):
 		mkdir -p $@
 
+riscv32-build1:
+	riscv32-unknown-elf-clang -mabi=ilp32d build/obj/$(MAIN1).s -o build/bin/$(MAIN1)
+
+riscv32-run1:
+	qemu-riscv32 build/bin/$(MAIN1)
+
+riscv32-build:
+	riscv32-unknown-elf-clang -mabi=ilp32d src/$(MAIN).c -o build/bin/$(MAIN)
+
+riscv32-run:
+	qemu-riscv32 build/bin/$(MAIN)
+
+gendag:
+	mkdir -p ./build/dag
+	rm -f /tmp/dag.main-*.dot
+	export LLVM_DOT_FILE_PRINT_PREFIX=$(pwd)/build/dag/  # 设置环境变量
+	$(LLC) -view-dag-combine1-dags build/obj/$(MAIN1).ll
+	dot -Tsvg /tmp/dag.main-*.dot -o build/dag/$(MAIN1).svg
+	firefox build/dag/$(MAIN1).svg # 需要安装火狐浏览器
+
+
+
 # 清理
 clean:
-		rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/bin
+	rm -rf $(BUILD_DIR)/obj/$(MAIN).*
 
 # 显示帮助信息
 help:

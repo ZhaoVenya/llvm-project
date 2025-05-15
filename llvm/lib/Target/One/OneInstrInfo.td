@@ -17,7 +17,7 @@ def : Pat <(i32 (imm:$imm12)), (ADDI X0, imm:$imm12)>;
 
 let isCall = 1 in {
     def JALR : I <OPC_JALR, (outs GPR: $rd), (ins GPR:$rs1, i32imm: $imm12),
-    "jalr $rd, $rs1, &imm12", []>;
+    "jalr $rd, $rs1, $imm12", []>;
 
 }
 

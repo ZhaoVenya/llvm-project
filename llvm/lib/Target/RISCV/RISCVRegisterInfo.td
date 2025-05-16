@@ -11,6 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 let Namespace = "RISCV" in {
+  // 定义的RISCV寄存器类型，Enc是编号，n是名称，alt是别名，别名可以是多个，继承Register
 class RISCVReg<bits<5> Enc, string n, list<string> alt = []> : Register<n> {
   let HWEncoding{4-0} = Enc;
   let AltNames = alt;

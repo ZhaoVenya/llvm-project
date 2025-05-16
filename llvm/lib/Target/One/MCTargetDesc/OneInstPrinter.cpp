@@ -15,7 +15,7 @@ using namespace llvm;
 
 
 void OneInstPrinter::printRegName(raw_ostream &OS, MCRegister Reg) {
-  OS << getRegisterName(Reg, One::ABIRegAltName);
+  OS << getRegisterName(Reg);
 }
 
 
@@ -62,6 +62,16 @@ void OneInstPrinter::printImmediate(const MCInst *MI, unsigned opNum,
 
 
 
-const char *OneInstPrinter::getRegisterName(MCRegister Reg){
-  return getRegisterName(Reg, One::NoRegAltName);
+// const char *OneInstPrinter::getRegisterName(MCRegister Reg){
+//   return getRegisterName(Reg);
+// }
+
+
+void OneInstPrinter::printMemOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O){
+
+  printOperand(MI, OpNo+1, O);
+  O << "(";
+  printOperand(MI, OpNo, O);
+  O << ")";
+
 }

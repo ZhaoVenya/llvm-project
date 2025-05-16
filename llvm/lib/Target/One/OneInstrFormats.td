@@ -1,15 +1,15 @@
-class OneOpcode <string name, bits<7> val, bits<3> funct3> {
-    string Name = name;
-    bits<7> Value = val;
-    bits<3> FUNCT3 = funct3;
-}
+// class OneOpcode <string name, bits<7> val, bits<3> funct3> {
+//     string Name = name;
+//     bits<7> Value = val;
+//     bits<3> FUNCT3 = funct3;
+// }
 
-def OPC_ADDI : OneOpcode<"ADDI",0b0010011, 0b000>;
-def OPC_JALR : OneOpcode<"JALR",0b1101111, 0b000>;
+// def OPC_ADDI : OneOpcode<"ADDI",0b0010011, 0b000>;
+// def OPC_JALR : OneOpcode<"JALR",0b1101111, 0b000>;
 
 
 class OneInst<dag outs, dag ins, string asmstr, list<dag> pattern> : Instruction{
-    field bits<32> Inst;
+    // field bits<32> Inst;
     field bits<32> SoftFail = 0;
 
     let Size = 4;
@@ -32,17 +32,26 @@ class PseudoInst<dag outs, dag ins, list<dag> pattern, string asmstr = "">
 
 }
 
-class I<OneOpcode opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
-    : OneInst<outs, ins, asmstr, pattern> {
-        bits <7> Opcode = opcode.Value;
-        bits <5> rd;
-        bits <3> funct3 = opcode.FUNCT3;
-        bits <5> rs1;
-        bits <12> imm12;
 
-        let Inst{6-0} = Opcode;
-        let Inst{11-7} = rd;
-        let Inst{14-12} = funct3;
-        let Inst{19-15} = rs1;
-        let Inst{31-20} = imm12;
+class I<dag outs, dag ins, string asmstr, list<dag> pattern>
+    : OneInst<outs, ins, asmstr, pattern> {
+
     }
+
+
+// class I<OneOpcode opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
+//     : OneInst<outs, ins, asmstr, pattern> {
+//         bits <7> Opcode = opcode.Value;
+//         bits <5> rd;
+//         bits <3> funct3 = opcode.FUNCT3;
+//         bits <5> rs1;
+//         bits <12> imm12;
+
+//         let Inst{6-0} = Opcode;
+//         let Inst{11-7} = rd;
+//         let Inst{14-12} = funct3;
+//         let Inst{19-15} = rs1;
+//         let Inst{31-20} = imm12;
+//     }
+
+

@@ -18,6 +18,7 @@ namespace llvm{
             void printInstruction(const MCInst *MI, uint64_t Address, raw_ostream &O);
             static const char *getRegisterName(MCRegister Reg);
             static const char *getRegisterName(MCRegister Reg, unsigned AltIdx);
+            void printMemOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O);
 
             void printRegName(raw_ostream &OS, MCRegister Reg) override;
             void printInst(const MCInst *MI, uint64_t Address, StringRef Annot,

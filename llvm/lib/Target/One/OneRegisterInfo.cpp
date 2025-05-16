@@ -13,14 +13,13 @@ using namespace llvm;
 #include "OneGenRegisterInfo.inc"
 
 
-OneRegisterInfo::OneRegisterInfo(const OneSubtarget &STI) : OneGenRegisterInfo(One::X1),STI(STI){
+OneRegisterInfo::OneRegisterInfo(const OneSubtarget &STI) : OneGenRegisterInfo(One::RA),STI(STI){
 
 }
 
 const MCPhysReg *OneRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
-    static const MCPhysReg CalleeSavedRegs[] = {One::X2, 0};
 
-    return CalleeSavedRegs;
+    return CC_CSR_SaveList;
 }
 
 
@@ -32,7 +31,10 @@ const uint32_t *OneRegisterInfo::getCallPreservedMask(const MachineFunction &MF,
 
 BitVector OneRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
     BitVector Reserved(getNumRegs());
-    Reserved.set(One::X0);
+    Reserved.set(One::ZERO);
+    Reserved.set(One::RA);
+    Reserved.set(One::SP);
+
     return Reserved;
 }
 
@@ -47,7 +49,7 @@ bool OneRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II, int SP
 
 
 Register OneRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
-    return One::X2;
+    return One::SP;
 }
 
 

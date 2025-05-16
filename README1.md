@@ -64,3 +64,14 @@
       return false;
     }
 
+2025/05/16 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>4.安装一些软件
+>>>>>>>> 4.1 安装riscv-toolchain工具
+>>>>>>>>>>>> 到这个连接下载：https://github.com/riscv-collab/riscv-gnu-toolchain/releases
+>>>>>>>>>>>> xz -d riscv32-elf-ubuntu-22.04-llvm-nightly-2024.11.22-nightly.tar.xz
+>>>>>>>>>>>> tar -xvf riscv32-elf-ubuntu-22.04-llvm-nightly-2024.11.22-nightly.tar.xz
+>>>>>>>> 4,2 安装qemu-user工具
+>>>>>>>>>>>> apt install qemu-user
+
+
+

@@ -3,14 +3,13 @@
 
 #include "OneInstrInfo.h"
 #include "OneRegisterInfo.h"
-#include "OneFrameLowering.h"
 #include "OneISelLowering.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 
 
 #define GET_SUBTARGETINFO_HEADER
 #include "OneGenSubtargetInfo.inc"
-
+#include "OneFrameLowering.h"
 
 namespace llvm
 {

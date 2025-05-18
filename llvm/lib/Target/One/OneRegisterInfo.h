@@ -11,7 +11,7 @@
 namespace llvm {
     class OneSubtarget;
     class OneRegisterInfo : public OneGenRegisterInfo {
-        const OneSubtarget &STI;
+    const OneSubtarget &STI;
 
     public:
         OneRegisterInfo(const OneSubtarget &STI);

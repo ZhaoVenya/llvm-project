@@ -11,7 +11,7 @@ class Target;
 
 Target &getTheOneTarget();
 
-}
+} // namespace llvm
 
 
 #endif //ONETARGETINFO_H

@@ -15,7 +15,7 @@ namespace llvm
     FunctionPass *createOneISelDag(OneTargetMachine &TM);
 
     void initializeOneDAGToDAGISelLegacyPass(PassRegistry &);
-} // namespace name
+} // namespace llvm
 
 
 #endif

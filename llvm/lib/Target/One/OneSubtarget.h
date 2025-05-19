@@ -15,6 +15,7 @@ namespace llvm
 {
     class OneSubtarget : public OneGenSubtargetInfo
     {
+
         private:
             OneInstrInfo InstrInfo;
             OneRegisterInfo RegInfo;
@@ -44,7 +45,7 @@ namespace llvm
 
     };
 
-} // namespace name
+} // namespace llvm
 
 #endif
 

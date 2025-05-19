@@ -10,22 +10,23 @@
 
 namespace llvm {
     class OneSubtarget;
+    
     class OneRegisterInfo : public OneGenRegisterInfo {
-    const OneSubtarget &STI;
+        const OneSubtarget &STI;
 
-    public:
-        OneRegisterInfo(const OneSubtarget &STI);
-        
-        const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
-        const uint32_t *getCallPreservedMask(const MachineFunction &MF, CallingConv::ID) const override;
+        public:
+            OneRegisterInfo(const OneSubtarget &STI);
+            
+            const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
+            const uint32_t *getCallPreservedMask(const MachineFunction &MF, CallingConv::ID) const override;
 
-        BitVector getReservedRegs(const MachineFunction &MF) const override;
+            BitVector getReservedRegs(const MachineFunction &MF) const override;
 
-        bool eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj,
-                                unsigned FIOperandNum,
-                                RegScavenger *RS = nullptr) const override;
+            bool eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj,
+                                    unsigned FIOperandNum,
+                                    RegScavenger *RS = nullptr) const override;
 
-        Register getFrameRegister(const MachineFunction &MF) const override;
+            Register getFrameRegister(const MachineFunction &MF) const override;
     };
 } // namespace llvm
 

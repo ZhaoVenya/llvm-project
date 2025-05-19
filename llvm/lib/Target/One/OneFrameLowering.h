@@ -4,10 +4,10 @@
 #ifndef ONEFRAMELOWERING_H
 #define ONEFRAMELOWERING_H
 
-#include "OneSubtarget.h"
-#include "llvm/CodeGen/MachineFunction.h"
+// #include "OneSubtarget.h"
+// #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/TargetFrameLowering.h"
-#include <cstdint>
+// #include <cstdint>
 
 namespace llvm{
     class OneSubtarget;
@@ -40,7 +40,6 @@ namespace llvm{
 
 
 }
-
 
 
 #endif

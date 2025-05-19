@@ -17,8 +17,8 @@ class OneDAGToDAGISel : public SelectionDAGISel {
   public:
     OneDAGToDAGISel() = delete;
 
-    explicit OneDAGToDAGISel(OneTargetMachine &TM)
-        : SelectionDAGISel(TM), Subtarget(nullptr) {}
+    explicit OneDAGToDAGISel(OneTargetMachine &TM, CodeGenOptLevel OL)
+        : SelectionDAGISel(TM, OL), Subtarget(nullptr) {}
 
     bool runOnMachineFunction(MachineFunction &MF) override;
 
@@ -73,7 +73,7 @@ class OneDAGToDAGISelLegacy : public SelectionDAGISelLegacy {
 public:
   static char ID;
   explicit OneDAGToDAGISelLegacy(OneTargetMachine &TM)
-      : SelectionDAGISelLegacy(ID, std::make_unique<OneDAGToDAGISel>(TM)) {}
+      : SelectionDAGISelLegacy(ID, std::make_unique<OneDAGToDAGISel>(TM, TM.getOptLevel())) {}
 };
 
 

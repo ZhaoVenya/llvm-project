@@ -2,6 +2,7 @@
 #define ONEISELLOWERING_H
 
 #include "llvm/CodeGen/TargetLowering.h"
+#include "llvm/Support/TypeSize.h"
 
 namespace llvm{
 

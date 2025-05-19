@@ -64,7 +64,7 @@ riscv32-run1:
 	qemu-riscv32 build/bin/$(MAIN1)
 
 riscv32-build:
-	riscv32-unknown-elf-clang -mabi=ilp32d src/$(MAIN).c -o build/bin/$(MAIN)
+	riscv32-unknown-elf-clang -mabi=ilp32d build/obj/$(MAIN).s -o build/bin/$(MAIN)
 
 riscv32-run:
 	qemu-riscv32 build/bin/$(MAIN)
@@ -73,9 +73,10 @@ gendag:
 	mkdir -p ./build/dag
 	rm -f /tmp/dag.main-*.dot
 	export LLVM_DOT_FILE_PRINT_PREFIX=$(pwd)/build/dag/  # 设置环境变量
-	$(LLC) -view-dag-combine1-dags build/obj/$(MAIN1).ll
-	dot -Tsvg /tmp/dag.main-*.dot -o build/dag/$(MAIN1).svg
-	firefox build/dag/$(MAIN1).svg # 需要安装火狐浏览器
+	# $(LLC) -view-dag-combine1-dags build/obj/$(MAIN).ll
+	$(LLC) -view-sched-dags build/obj/$(MAIN).ll
+	dot -Tsvg /tmp/dag.main-*.dot -o build/dag/$(MAIN).svg
+	firefox build/dag/$(MAIN).svg # 需要安装火狐浏览器
 
 
 

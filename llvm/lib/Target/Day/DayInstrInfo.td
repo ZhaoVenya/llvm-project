@@ -128,6 +128,7 @@ def ANDI  : ALU_ri<0b111, "andi">;
 
 
 ////////////////////////////////////////////////////////
+// 根据B类型的class,定义一些B类型的指令
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class BranchCC_rri<bits<3> funct3, string opcodestr>
     : RVInstB<funct3, OPC_BRANCH, (outs),
@@ -147,6 +148,7 @@ def BGEU : BranchCC_rri<0b111, "bgeu">;
 
 
 ////////////////////////////////////////////////////////
+// 根据Load对应的opcode,定义一些load指令
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in {
 class Load_ri<bits<3> funct3, string opcodestr, DAGOperand rty = GPR>
     : RVInstI<funct3, OPC_LOAD, (outs rty:$rd), (ins GPRMem:$rs1, simm12:$imm12),
@@ -157,6 +159,7 @@ class HLoad_r<bits<7> funct7, bits<5> funct5, string opcodestr>
               (ins GPRMemZeroOffset:$rs1), opcodestr, "$rd, $rs1"> {
   let rs2 = funct5;
 }
+
 }
 
 let IsSignExtendingOpW = 1 in {
@@ -169,6 +172,7 @@ def LHU : Load_ri<0b101, "lhu">, Sched<[WriteLDH, ReadMemBase]>;
 
 
 ////////////////////////////////////////////////////////
+// 根据store(也就是S类型指令)对应的opcode,定义一些stor指令
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in {
 class Store_rri<bits<3> funct3, string opcodestr, DAGOperand rty = GPR>
     : RVInstS<funct3, OPC_STORE, (outs),
@@ -209,3 +213,49 @@ def JALR : RVInstI<0b000, OPC_JALR, (outs GPR:$rd),
            Sched<[WriteJalr, ReadJalr]>;
 } // hasSideEffects = 0, mayLoad = 0, mayStore = 0
 
+///////////////////////////////////////////////////////////
+// 这个地方是最后那几个特殊的instruction
+def FENCE : RVInstI<0b000, OPC_MISC_MEM, (outs),
+                    (ins fencearg:$pred, fencearg:$succ),
+                    "fence", "$pred, $succ">, Sched<[]> {
+  bits<4> pred;
+  bits<4> succ;
+
+  let rs1 = 0;
+  let rd = 0;
+  let imm12 = {0b0000,pred,succ};
+}
+
+def FENCE_TSO : RVInstI<0b000, OPC_MISC_MEM, (outs), (ins), "fence.tso", "">, Sched<[]> {
+  let rs1 = 0;
+  let rd = 0;
+  let imm12 = {0b1000,0b0011,0b0011};
+}
+
+def ECALL : RVInstI<0b000, OPC_SYSTEM, (outs), (ins), "ecall", "">, Sched<[WriteJmp]> {
+  let rs1 = 0;
+  let rd = 0;
+  let imm12 = 0;
+}
+
+def EBREAK : RVInstI<0b000, OPC_SYSTEM, (outs), (ins), "ebreak", "">,
+             Sched<[]> {
+  let rs1 = 0;
+  let rd = 0;
+  let imm12 = 1;
+}
+
+//// 基本指令集到这里就差不多没有了
+////////////////////////////////////////////////////////////////////////////////
+//// 再往后边就是一些扩展指令了，当打开下边的文档后：
+////《The RISC-V Instruction Set Manual Volume I: Unprivileged Architecture, Version 20240411》
+//// 只看它的目录，发现最重要的是第2章，也就是RV32I最基础的部分
+//// 第3-5章，用不上，不是一个指令集的
+//// 第6-12章，有好多Z开头的扩展指令集，其实有些还是很重要的，比如第7章的Zicsr，这里先不涉及
+//// 第13章，M乘法指令，不管
+//// 第14章，A原子操作，不管
+//// 第15-16章，不管
+//// 第17章，RVWMO是什么东东？不管
+//// 第18-33章，感觉也用不到啊，先不管
+//// 第34章，还是有用的，最基本的opcode在这章都有定义！
+//// 其余章节，不用管

@@ -27,7 +27,7 @@ OneRegisterInfo::OneRegisterInfo(const OneSubtarget &STI) :
 
 const MCPhysReg *OneRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
 
-    return CC_CSR_SaveList;
+    return CSR_SaveList;
 }
 
 

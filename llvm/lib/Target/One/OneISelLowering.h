@@ -10,7 +10,7 @@ namespace llvm{
 
     namespace OneISD{
         enum NodeType : unsigned{
-            FIRST_NUM=ISD::BUILTIN_OP_END, RET_GLUE
+            FIRST_NUM=ISD::BUILTIN_OP_END, RET_GLUE, Call
         };
     } // namespace OneISD
 
@@ -23,6 +23,8 @@ namespace llvm{
                                 const OneSubtarget &STI);
 
             const OneSubtarget &getSubtarget() const { return Subtarget; }
+
+            SDValue LowerCall(CallLoweringInfo &CLI, SmallVectorImpl<SDValue>& InVals) const override;
 
 
             SDValue LowerFormalArguments(SDValue Chain, CallingConv::ID CallConv,

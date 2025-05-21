@@ -34,7 +34,7 @@ include "DayInstrFormats.td"
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class ALU_rr<bits<7> funct7, bits<3> funct3, string opcodestr,
              bit Commutable = 0>
-    : RVInstR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+    : DayInstR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
               opcodestr, "$rd, $rs1, $rs2"> {
   let isCommutable = Commutable;
 }
@@ -42,7 +42,7 @@ class ALU_rr<bits<7> funct7, bits<3> funct3, string opcodestr,
 /*********这段注释中是正常写法*************
 class ALU_rr<bits<7> funct7, bits<3> funct3, string opcodestr,
              bit Commutable = 0>
-    : RVInstR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+    : DayInstR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
               opcodestr, "$rd, $rs1, $rs2"> {
   let hasSideEffects = 0;   
   let mayLoad = 0;              
@@ -102,9 +102,12 @@ def AND  : ALU_rr<0b0000000, 0b111, "and", Commutable=1>,
 ///////////////////////////////////////////////////////////
 // 根据I类型的class,定义一些I类型的指令
 
+// 因为这个地方的立即数是12bit宽的，所以要对一个12位宽的立即数进行定义
+def uimm12 : Operand<i32>, ImmLeaf<i32, [{ return isInt<12>(Imm);}]>;
+
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class ALU_ri<bits<3> funct3, string opcodestr>
-    : RVInstI<funct3, OPC_OP_IMM, (outs GPR:$rd), (ins GPR:$rs1, simm12:$imm12),
+    : DayInstI<funct3, OPC_OP_IMM, (outs GPR:$rd), (ins GPR:$rs1, uimm12:$imm12),
               opcodestr, "$rd, $rs1, $imm12">,
       Sched<[WriteIALU, ReadIALU]>;
 
@@ -129,9 +132,13 @@ def ANDI  : ALU_ri<0b111, "andi">;
 
 ////////////////////////////////////////////////////////
 // 根据B类型的class,定义一些B类型的指令
+// RISC-V 的 B 类型指令（如 BEQ、BNE）的 立即数是 13 位有符号数且最低位必须为 0（即 lsb0，Least Significant Bit 0）
+// 
+def simm13_lsb0 : Operand<i32>, ImmLeaf<i32, [{ return isInt<13>(Imm) && (Imm & 1) == 0; }]>;
+
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class BranchCC_rri<bits<3> funct3, string opcodestr>
-    : RVInstB<funct3, OPC_BRANCH, (outs),
+    : DayInstB<funct3, OPC_BRANCH, (outs),
               (ins GPR:$rs1, GPR:$rs2, simm13_lsb0:$imm12),
               opcodestr, "$rs1, $rs2, $imm12">,
       Sched<[WriteJmp, ReadJmp, ReadJmp]> {
@@ -151,11 +158,11 @@ def BGEU : BranchCC_rri<0b111, "bgeu">;
 // 根据Load对应的opcode,定义一些load指令
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in {
 class Load_ri<bits<3> funct3, string opcodestr, DAGOperand rty = GPR>
-    : RVInstI<funct3, OPC_LOAD, (outs rty:$rd), (ins GPRMem:$rs1, simm12:$imm12),
+    : DayInstI<funct3, OPC_LOAD, (outs rty:$rd), (ins GPRMem:$rs1, uimm12:$imm12),
               opcodestr, "$rd, ${imm12}(${rs1})">;
 
 class HLoad_r<bits<7> funct7, bits<5> funct5, string opcodestr>
-    : RVInstR<funct7, 0b100, OPC_SYSTEM, (outs GPR:$rd),
+    : DayInstR<funct7, 0b100, OPC_SYSTEM, (outs GPR:$rd),
               (ins GPRMemZeroOffset:$rs1), opcodestr, "$rd, $rs1"> {
   let rs2 = funct5;
 }
@@ -175,12 +182,12 @@ def LHU : Load_ri<0b101, "lhu">, Sched<[WriteLDH, ReadMemBase]>;
 // 根据store(也就是S类型指令)对应的opcode,定义一些stor指令
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in {
 class Store_rri<bits<3> funct3, string opcodestr, DAGOperand rty = GPR>
-    : RVInstS<funct3, OPC_STORE, (outs),
-              (ins rty:$rs2, GPRMem:$rs1, simm12:$imm12),
+    : DayInstS<funct3, OPC_STORE, (outs),
+              (ins rty:$rs2, GPRMem:$rs1, uimm12:$imm12),
               opcodestr, "$rs2, ${imm12}(${rs1})">;
 
 class HStore_rr<bits<7> funct7, string opcodestr>
-    : RVInstR<funct7, 0b100, OPC_SYSTEM, (outs),
+    : DayInstR<funct7, 0b100, OPC_SYSTEM, (outs),
               (ins GPR:$rs2, GPRMemZeroOffset:$rs1),
                opcodestr, "$rs2, $rs1"> {
   let rd = 0;
@@ -194,28 +201,87 @@ def SW : Store_rri<0b010, "sw">, Sched<[WriteSTW, ReadStoreData, ReadMemBase]>;
 
 ///////////////////////////////////////////////////////////
 // 根据U,J,I类型的class,定义一些相关类型的指令，比较鱼龙混杂，instrformats中也提到过
+class DayOp<ValueType vt = XLenVT> : Operand<vt> {
+  let OperandNamespace = "DayOp";
+}
+
+class DayUImmOp<int bitsNum> : DayOp {
+  let ParserMatchClass = UImmAsmOperand<bitsNum>;
+  let EncoderMethod = "getImmOpValue";
+  let DecoderMethod = "decodeUImmOperand<" # bitsNum # ">";
+  let OperandType = "OPERAND_UIMM" # bitsNum;
+  let MCOperandPredicate = [{
+    int64_t Imm;
+    if (!MCOp.evaluateAsConstantImm(Imm))
+      return false;
+    return isUInt<}]# bitsNum #[{>(Imm);
+  }];
+}
+
+class UImm20OperandMaybeSym : DayUImmOp<20> {
+  let MCOperandPredicate = [{
+    int64_t Imm;
+    if (MCOp.evaluateAsConstantImm(Imm))
+      return isUInt<20>(Imm);
+    return MCOp.isBareSymbolRef();
+  }];
+}
+
+
+def uimm20_lui : UImm20OperandMaybeSym {
+  let ParserMatchClass = UImmAsmOperand<20, "LUI">;
+}
+def uimm20_auipc : UImm20OperandMaybeSym {
+  let ParserMatchClass = UImmAsmOperand<20, "AUIPC">;
+}
+
+def uimm20 : DayUImmOp<20>;
+
+def simm21_lsb0_jal : Operand<OtherVT> {
+  let ParserMatchClass = Simm21Lsb0JALAsmOperand;
+  let PrintMethod = "printBranchOperand";
+  let EncoderMethod = "getImmOpValueAsr1";
+  let DecoderMethod = "decodeSImmOperandAndLsl1<21>";
+  let MCOperandPredicate = [{
+    int64_t Imm;
+    if (MCOp.evaluateAsConstantImm(Imm))
+      return isShiftedInt<20, 1>(Imm);
+    return MCOp.isBareSymbolRef();
+  }];
+  let OperandType = "OPERAND_PCREL";
+}
+
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 let isReMaterializable = 1, isAsCheapAsAMove = 1,
     IsSignExtendingOpW = 1 in
-def LUI : RVInstU<OPC_LUI, (outs GPR:$rd), (ins uimm20_lui:$imm20),
+def LUI : DayInstU<OPC_LUI, (outs GPR:$rd), (ins uimm20_lui:$imm20),
                   "lui", "$rd, $imm20">, Sched<[WriteIALU]>;
 
-def AUIPC : RVInstU<OPC_AUIPC, (outs GPR:$rd), (ins uimm20_auipc:$imm20),
+def AUIPC : DayInstU<OPC_AUIPC, (outs GPR:$rd), (ins uimm20_auipc:$imm20),
                     "auipc", "$rd, $imm20">, Sched<[WriteIALU]>;
 
-def JAL : RVInstJ<OPC_JAL, (outs GPR:$rd), (ins simm21_lsb0_jal:$imm20),
+def JAL : DayInstJ<OPC_JAL, (outs GPR:$rd), (ins simm21_lsb0_jal:$imm20),
                   "jal", "$rd, $imm20">, Sched<[WriteJal]>;
 
-def JALR : RVInstI<0b000, OPC_JALR, (outs GPR:$rd),
-                   (ins GPR:$rs1, simm12:$imm12),
+def JALR : DayInstI<0b000, OPC_JALR, (outs GPR:$rd),
+                   (ins GPR:$rs1, uimm12:$imm12),
                    "jalr", "$rd, ${imm12}(${rs1})">,
            Sched<[WriteJalr, ReadJalr]>;
 } // hasSideEffects = 0, mayLoad = 0, mayStore = 0
 
 ///////////////////////////////////////////////////////////
 // 这个地方是最后那几个特殊的instruction
-def FENCE : RVInstI<0b000, OPC_MISC_MEM, (outs),
+
+def fencearg : DayOp {
+  let ParserMatchClass = FenceArg;
+  let PrintMethod = "printFenceArg";
+  let DecoderMethod = "decodeUImmOperand<4>";
+  let OperandType = "OPERAND_UIMM4";
+}
+
+
+def FENCE : DayInstI<0b000, OPC_MISC_MEM, (outs),
                     (ins fencearg:$pred, fencearg:$succ),
                     "fence", "$pred, $succ">, Sched<[]> {
   bits<4> pred;
@@ -226,19 +292,19 @@ def FENCE : RVInstI<0b000, OPC_MISC_MEM, (outs),
   let imm12 = {0b0000,pred,succ};
 }
 
-def FENCE_TSO : RVInstI<0b000, OPC_MISC_MEM, (outs), (ins), "fence.tso", "">, Sched<[]> {
+def FENCE_TSO : DayInstI<0b000, OPC_MISC_MEM, (outs), (ins), "fence.tso", "">, Sched<[]> {
   let rs1 = 0;
   let rd = 0;
   let imm12 = {0b1000,0b0011,0b0011};
 }
 
-def ECALL : RVInstI<0b000, OPC_SYSTEM, (outs), (ins), "ecall", "">, Sched<[WriteJmp]> {
+def ECALL : DayInstI<0b000, OPC_SYSTEM, (outs), (ins), "ecall", "">, Sched<[WriteJmp]> {
   let rs1 = 0;
   let rd = 0;
   let imm12 = 0;
 }
 
-def EBREAK : RVInstI<0b000, OPC_SYSTEM, (outs), (ins), "ebreak", "">,
+def EBREAK : DayInstI<0b000, OPC_SYSTEM, (outs), (ins), "ebreak", "">,
              Sched<[]> {
   let rs1 = 0;
   let rd = 0;

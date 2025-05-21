@@ -110,10 +110,10 @@ class DayInst<dag outs, dag ins, string opcodestr, string argstr,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
-//// 这里定义RISCV R类型的基本指令集的格式，因为 R类型指令有很多变体，所以有一个RBase还有一个R
-class RVInstRBase<bits<3> funct3, RISCVOpcode opcode, dag outs,
+//// 这里定义Day R类型的基本指令集的格式，因为 R类型指令有很多变体，所以有一个RBase还有一个R
+class DayInstRBase<bits<3> funct3, DayOpcode opcode, dag outs,
                   dag ins, string opcodestr, string argstr>
-    : RVInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
+    : DayInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
   bits<5> rs2;
   bits<5> rs1;
   bits<5> rd;
@@ -125,16 +125,16 @@ class RVInstRBase<bits<3> funct3, RISCVOpcode opcode, dag outs,
   let Inst{6-0} = opcode.Value;
 }
 
-class RVInstR<bits<7> funct7, bits<3> funct3, RISCVOpcode opcode, dag outs,
+class DayInstR<bits<7> funct7, bits<3> funct3, DayOpcode opcode, dag outs,
               dag ins, string opcodestr, string argstr>
-    : RVInstRBase<funct3, opcode, outs, ins, opcodestr, argstr> {
+    : DayInstRBase<funct3, opcode, outs, ins, opcodestr, argstr> {
   let Inst{31-25} = funct7;
 }
 
-//// 这里定义RISCV I类型的基本指令集的格式，因为I类型指令有很多变体，所以有一个IBase还有一个I
-class RVInstIBase<bits<3> funct3, RISCVOpcode opcode, dag outs, dag ins,
+//// 这里定义Day I类型的基本指令集的格式，因为I类型指令有很多变体，所以有一个IBase还有一个I
+class DayInstIBase<bits<3> funct3, DayOpcode opcode, dag outs, dag ins,
                   string opcodestr, string argstr>
-    : RVInst<outs, ins, opcodestr, argstr, [], InstFormatI> {
+    : DayInst<outs, ins, opcodestr, argstr, [], InstFormatI> {
   bits<5> rs1;
   bits<5> rd;
 
@@ -144,18 +144,18 @@ class RVInstIBase<bits<3> funct3, RISCVOpcode opcode, dag outs, dag ins,
   let Inst{6-0} = opcode.Value;
 }
 
-class RVInstI<bits<3> funct3, RISCVOpcode opcode, dag outs, dag ins,
+class DayInstI<bits<3> funct3, DayOpcode opcode, dag outs, dag ins,
               string opcodestr, string argstr>
-    : RVInstIBase<funct3, opcode, outs, ins, opcodestr, argstr> {
+    : DayInstIBase<funct3, opcode, outs, ins, opcodestr, argstr> {
   bits<12> imm12;
 
   let Inst{31-20} = imm12;
 }
 
-//// 这里定义RISCV S类型的基本指令集的格式, 因为S类型指令比较简单粗暴，所以就没有定义SBase
-class RVInstS<bits<3> funct3, RISCVOpcode opcode, dag outs, dag ins,
+//// 这里定义Day S类型的基本指令集的格式, 因为S类型指令比较简单粗暴，所以就没有定义SBase
+class DayInstS<bits<3> funct3, DayOpcode opcode, dag outs, dag ins,
               string opcodestr, string argstr>
-    : RVInst<outs, ins, opcodestr, argstr, [], InstFormatS> {
+    : DayInst<outs, ins, opcodestr, argstr, [], InstFormatS> {
   bits<12> imm12;
   bits<5> rs2;
   bits<5> rs1;
@@ -168,10 +168,10 @@ class RVInstS<bits<3> funct3, RISCVOpcode opcode, dag outs, dag ins,
   let Inst{6-0} = opcode.Value;
 }
 
-//// 这里定义RISCV B类型的基本指令集的格式, 因为B类型指令比较简单粗暴，所以就没有定义BBase
-class RVInstB<bits<3> funct3, RISCVOpcode opcode, dag outs, dag ins,
+//// 这里定义Day B类型的基本指令集的格式, 因为B类型指令比较简单粗暴，所以就没有定义BBase
+class DayInstB<bits<3> funct3, DayOpcode opcode, dag outs, dag ins,
               string opcodestr, string argstr>
-    : RVInst<outs, ins, opcodestr, argstr, [], InstFormatB> {
+    : DayInst<outs, ins, opcodestr, argstr, [], InstFormatB> {
   bits<12> imm12;
   bits<5> rs2;
   bits<5> rs1;
@@ -186,10 +186,10 @@ class RVInstB<bits<3> funct3, RISCVOpcode opcode, dag outs, dag ins,
   let Inst{6-0} = opcode.Value;
 }
 
-//// 这里定义RISCV U类型的基本指令集的格式 因为U类型指令比较简单粗暴，所以就没有定义UBase
-class RVInstU<RISCVOpcode opcode, dag outs, dag ins, string opcodestr,
+//// 这里定义Day U类型的基本指令集的格式 因为U类型指令比较简单粗暴，所以就没有定义UBase
+class DayInstU<DayOpcode opcode, dag outs, dag ins, string opcodestr,
               string argstr>
-    : RVInst<outs, ins, opcodestr, argstr, [], InstFormatU> {
+    : DayInst<outs, ins, opcodestr, argstr, [], InstFormatU> {
   bits<20> imm20;
   bits<5> rd;
 
@@ -198,10 +198,10 @@ class RVInstU<RISCVOpcode opcode, dag outs, dag ins, string opcodestr,
   let Inst{6-0} = opcode.Value;
 }
 
-//// 这里定义RISCV J类型的基本指令集的格式 因为J类型指令比较简单粗暴，所以就没有定义JBase
-class RVInstJ<RISCVOpcode opcode, dag outs, dag ins, string opcodestr,
+//// 这里定义Day J类型的基本指令集的格式 因为J类型指令比较简单粗暴，所以就没有定义JBase
+class DayInstJ<DayOpcode opcode, dag outs, dag ins, string opcodestr,
               string argstr>
-    : RVInst<outs, ins, opcodestr, argstr, [], InstFormatJ> {
+    : DayInst<outs, ins, opcodestr, argstr, [], InstFormatJ> {
   bits<20> imm20;
   bits<5> rd;
 

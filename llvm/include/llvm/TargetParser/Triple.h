@@ -74,6 +74,7 @@ public:
     r600,           // R600: AMD GPUs HD2XXX - HD6XXX
     amdgcn,         // AMDGCN: AMD GCN GPUs
     riscv32,        // RISC-V (32-bit): riscv32
+    day,            // DAY: Day LEARN
     riscv64,        // RISC-V (64-bit): riscv64
     sparc,          // Sparc: sparc
     sparcv9,        // Sparcv9: Sparcv9
@@ -995,6 +996,10 @@ public:
 
   bool isONE() const {
     return getArch() == Triple::one;
+  }
+
+  bool isDAY() const {
+    return getArch() == Triple::day;
   }
 
   /// Tests whether the target is PowerPC (32- or 64-bit LE or BE).

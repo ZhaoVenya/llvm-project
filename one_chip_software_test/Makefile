@@ -64,6 +64,7 @@ riscv32-run1:
 	qemu-riscv32 build/bin/$(MAIN1)
 
 riscv32-build:
+	mkdir -p build/bin
 	riscv32-unknown-elf-clang -mabi=ilp32d build/obj/$(MAIN).s -o build/bin/$(MAIN)
 
 riscv32-run:

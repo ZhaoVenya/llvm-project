@@ -42,7 +42,6 @@ namespace llvm
             const TargetLowering *getTargetLowering() const override {return &TLInfo;}
             void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
 
-
     };
 
 } // namespace llvm

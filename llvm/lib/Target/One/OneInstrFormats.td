@@ -7,51 +7,45 @@
 // def OPC_ADDI : OneOpcode<"ADDI",0b0010011, 0b000>;
 // def OPC_JALR : OneOpcode<"JALR",0b1101111, 0b000>;
 
-
-class OneInst<dag outs, dag ins, string asmstr, list<dag> pattern> : Instruction{
-    // field bits<32> Inst;
+class OneInst<dag outs, dag ins, string asmstr, list<dag> pattern> : Instruction {
     field bits<32> SoftFail = 0;
 
     let Size = 4;
 
     let Namespace = "One";
+
     dag OutOperandList = outs;
     dag InOperandList = ins;
-
     let AsmString = asmstr;
     let Pattern = pattern;
-
 }
-
 
 class PseudoInst<dag outs, dag ins, list<dag> pattern, string asmstr = "">
-    : OneInst<outs, ins , asmstr, pattern>{
-        let isPseudo = 1;
-        let isCodeGenOnly = 1;
-
-
+    : OneInst<outs, ins, asmstr, pattern> {
+    let isPseudo = 1;
+    let isCodeGenOnly = 1;
 }
 
+class R<dag outs, dag ins, string asmstr, list<dag> pattern>
+    : OneInst<outs, ins, asmstr, pattern> {
+}
 
 class I<dag outs, dag ins, string asmstr, list<dag> pattern>
     : OneInst<outs, ins, asmstr, pattern> {
+}
 
-    }
+class U<dag outs, dag ins, string asmstr, list<dag> pattern>
+    : OneInst<outs, ins, asmstr, pattern> {
+}
 
+class J<dag outs, dag ins, string asmstr, list<dag> pattern>
+    : OneInst<outs, ins, asmstr, pattern> {
+}
 
-// class I<OneOpcode opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
-//     : OneInst<outs, ins, asmstr, pattern> {
-//         bits <7> Opcode = opcode.Value;
-//         bits <5> rd;
-//         bits <3> funct3 = opcode.FUNCT3;
-//         bits <5> rs1;
-//         bits <12> imm12;
+class B<dag outs, dag ins, string asmstr, list<dag> pattern>
+    : OneInst<outs, ins, asmstr, pattern> {
+}
 
-//         let Inst{6-0} = Opcode;
-//         let Inst{11-7} = rd;
-//         let Inst{14-12} = funct3;
-//         let Inst{19-15} = rs1;
-//         let Inst{31-20} = imm12;
-//     }
-
-
+class S<dag outs, dag ins, string asmstr, list<dag> pattern>
+    : OneInst<outs, ins, asmstr, pattern> {
+}

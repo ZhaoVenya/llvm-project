@@ -18,16 +18,18 @@ namespace llvm {
                 Subtarget = static_cast<OneTargetMachine &>(TM).getSubtargetImpl();
             }
             
-            StringRef getPassName() const override { return "ONe Assembly Printer";}
+            StringRef getPassName() const override { return "One Assembly Printer";}
 
             virtual bool runOnMachineFunction(MachineFunction &MF) override;
+            
             void emitInstruction(const MachineInstr *MI) override;
-        
+            
+            bool lowerOperand(const MachineOperand &MO, MCOperand &MCO) const;
+
         private:
             bool lowerPseudoInstExpansion(const MachineInstr *MI, MCInst &Out);
             void lowerToMCInst(const MachineInstr *MI, MCInst &Out);
-
-
+            MCOperand lowerSymbolOperand(const MachineOperand &MO) const;
     };
 
 } // namespace llvm

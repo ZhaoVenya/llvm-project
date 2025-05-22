@@ -5,5 +5,7 @@ add_llvm_component_library(LLVMOneInfo
         LINK_COMPONENTS
         MC
         Support
-        CodeGen
+        
+        ADD_TO_COMPONENT
+        One
 )

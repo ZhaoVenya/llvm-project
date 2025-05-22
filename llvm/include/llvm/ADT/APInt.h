@@ -23,6 +23,7 @@
 #include <cstring>
 #include <optional>
 #include <utility>
+// #include "stdio.h"
 
 namespace llvm {
 class FoldingSetNodeID;
@@ -124,7 +125,7 @@ public:
         if (BitWidth == 0) {
           assert(val == 0 && "Value must be zero for unsigned 0-bit APInt");
         } else {
-          assert(llvm::isUIntN(BitWidth, val) &&
+/*  */          assert(llvm::isUIntN(BitWidth, val) &&
                  "Value is not an N-bit unsigned value");
         }
       }

@@ -75,3 +75,10 @@ void OneInstPrinter::printMemOperand(const MCInst *MI, unsigned OpNo, raw_ostrea
   O << ")";
 
 }
+
+void OneInstPrinter::printPtrOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O) {
+  printOperand(MI, OpNo, O);
+  O << ",";
+  printOperand(MI, OpNo+1, O);
+}
+

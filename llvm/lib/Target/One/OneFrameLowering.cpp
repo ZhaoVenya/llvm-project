@@ -1,14 +1,14 @@
 #include "OneFrameLowering.h"
-#include "OneSubtarget.h"
-#include "OneInstrInfo.h"
 #include "MCTargetDesc/OneMCTargetDesc.h"
-#include "llvm/CodeGen/MachineBasicBlock.h"
-#include "llvm/CodeGen/MachineInstrBuilder.h"
-#include "llvm/CodeGen/TargetInstrInfo.h"
-#include "llvm/CodeGen/MachineFrameInfo.h"
-#include "llvm/IR/DebugLoc.h"
-#include <cstdint>
+
 #include "One.h"
+#include "OneSubtarget.h"
+
+#include "llvm/CodeGen/MachineFrameInfo.h"
+#include "llvm/CodeGen/MachineInstrBuilder.h"
+
+#include <cstdint>
+
 
 using namespace llvm;
 
@@ -23,47 +23,51 @@ uint64_t OneFrameLowering::computeStateSize(MachineFunction &MF) const{
 }
 
 
-void OneFrameLowering::emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const {
+void OneFrameLowering::emitPrologue(MachineFunction &MF,
+                                    MachineBasicBlock &MBB) const {
+  MachineBasicBlock::iterator MBBI = MBB.begin();
 
-    MachineBasicBlock::iterator MBBI = MBB.begin();
-    const TargetInstrInfo &TII = *STI.getInstrInfo();
-    DebugLoc DL= MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  const TargetInstrInfo &TII = *STI.getInstrInfo();
 
-    uint64_t STACKSIZE = computeStateSize(MF);
+  int STACKSIZE = computeStateSize(MF);
 
-    if(STACKSIZE == 0){
-        return;
-    }
+  if (STACKSIZE == 0) {
+    return;
+  }
 
-    BuildMI(MBB,MBBI,DL,TII.get(One::ADDI), One::SP)
-        .addReg(One::SP)
-        .addImm(-STACKSIZE)
-        .setMIFlag(MachineInstr::FrameSetup);
+  DebugLoc DL = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  BuildMI(MBB, MBBI, DL, TII.get(One::ADDI), One::SP)
+      .addReg(One::SP)
+      .addImm(-STACKSIZE)
+      .setMIFlag(MachineInstr::FrameSetup);
 }
 
-void OneFrameLowering::emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const {
-    MachineBasicBlock::iterator MBBI = MBB.getLastNonDebugInstr();
-    const TargetInstrInfo &TII = *STI.getInstrInfo();
-    DebugLoc DL= MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+void OneFrameLowering::emitEpilogue(MachineFunction &MF,
+                                    MachineBasicBlock &MBB) const {
+  MachineBasicBlock::iterator MBBI = MBB.getLastNonDebugInstr();
 
-    uint64_t STACKSIZE = computeStateSize(MF);
+  const TargetInstrInfo &TII = *STI.getInstrInfo();
 
-    if(STACKSIZE == 0){
-        return;
-    }
+  int STACKSIZE = computeStateSize(MF);
 
-    BuildMI(MBB,MBBI,DL,TII.get(One::ADDI), One::SP)
-        .addReg(One::SP)
-        .addImm(STACKSIZE)
-        .setMIFlag(MachineInstr::FrameDestroy);
+  if (STACKSIZE == 0) {
+    return;
+  }
 
-
+  DebugLoc DL = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  BuildMI(MBB, MBBI, DL, TII.get(One::ADDI), One::SP)
+      .addReg(One::SP)
+      .addImm(STACKSIZE)
+      .setMIFlag(MachineInstr::FrameDestroy);
 }
 
-
-bool OneFrameLowering::hasFPImpl(const MachineFunction &MF) const{
-    return false;
+void OneFrameLowering::determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs, RegScavenger *RS) const {
+  TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
+  if (MF.getFrameInfo().hasCalls()) {
+    SavedRegs.set(One::RA);
+  }
 }
 
-
-
+bool OneFrameLowering::hasFPImpl(const MachineFunction &MF) const {
+  return false;
+}

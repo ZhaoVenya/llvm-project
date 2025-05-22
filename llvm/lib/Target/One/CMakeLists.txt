@@ -22,6 +22,7 @@ add_llvm_target(OneCodeGen
         OneISelLowering.cpp
         OneISelDAGToDAG.cpp
         OneAsmPrinter.cpp
+        OneCallingConv.cpp
         
 
         LINK_COMPONENTS

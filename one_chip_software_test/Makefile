@@ -37,18 +37,18 @@ run:$(TARGET)
 
 # 链接可执行文件
 $(TARGET): $(OBJS) | $(BIN_DIR)
-		$(CXX) $(LDFLAGS) -o $@ $^
+		$(CXX) -target riscv32-unknown-elf -march=rv32i $(LDFLAGS) -o $@ $^ #-mabi=ilp32f
 
 # 编译源文件到对象文件
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-		$(CXX) $(CXXFLAGS) -c $< -o $@
+		$(CXX) -target riscv32-unknown-elf -march=rv32i $(CXXFLAGS) -c $< -o $@ #-mabi=ilp32f
 
 # 可选：生成LLVM bitcode（用于分析等）
 $(OBJ_DIR)/%.bc: $(SRC_DIR)/%.c | $(OBJ_DIR)
-		$(CXX) -I$(INC_DIR) -emit-llvm -c $< -o $@
+		$(CXX) -target riscv32-unknown-elf -march=rv32i -c $< -o $@ #-mabi=ilp32f
 
 $(OBJ_DIR)/%.ll: $(SRC_DIR)/%.c | $(OBJ_DIR)
-		$(CXX) -target riscv32-unknown-elf -march=rv32imafdc -mabi=ilp32d -O0 -S -emit-llvm $< -o $@ #
+		$(CXX) -target riscv32-unknown-elf -march=rv32i -O0 -S -emit-llvm $< -o $@ #-mabi=ilp32f
 
 # 创建必要的目录
 $(BIN_DIR):
@@ -78,6 +78,8 @@ gendag:
 	dot -Tsvg /tmp/dag.main-*.dot -o build/dag/$(MAIN).svg
 	firefox build/dag/$(MAIN).svg # 需要安装火狐浏览器
 
+genll:
+	$(CXX) -target riscv32-unknown-elf -march=rv32i -mabi=ilp32 -O0 -S -emit-llvm src/main.c -o build/obj/main.ll #
 
 
 # 清理

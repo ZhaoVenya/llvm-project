@@ -28,6 +28,7 @@
 #include "llvm/Support/Timer.h"
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
+#include <iostream>
 
 using namespace llvm;
 
@@ -1384,6 +1385,7 @@ bool FPPassManager::runOnFunction(Function &F) {
   llvm::TimeTraceScope FunctionScope("OptFunction", Name);
 
   for (unsigned Index = 0; Index < getNumContainedPasses(); ++Index) {
+    printf("Index is %d start\n", Index);
     FunctionPass *FP = getContainedPass(Index);
     bool LocalChanged = false;
 
@@ -1440,6 +1442,7 @@ bool FPPassManager::runOnFunction(Function &F) {
       removeNotPreservedAnalysis(FP);
     recordAvailableAnalysis(FP);
     removeDeadPasses(FP, Name, ON_FUNCTION_MSG);
+    printf("Index is %d end\n",Index);
   }
 
   return Changed;

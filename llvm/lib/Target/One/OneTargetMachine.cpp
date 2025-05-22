@@ -75,7 +75,7 @@ namespace  {
             bool addInstSelector() override;
     };
 
-}
+} // namespace
 
 TargetPassConfig *OneTargetMachine::createPassConfig(PassManagerBase &PM){
     return new OnePassConfig(*this, PM);

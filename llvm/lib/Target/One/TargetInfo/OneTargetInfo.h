@@ -9,11 +9,11 @@
 
 namespace llvm {
 
-class Target;
+    class Target;
 
-Target &getTheOneTarget();
+    Target &getTheOneTarget(); // 对getTheOneTarget进行声明
 
-}
+} // namespace llvm
 
 
 #endif //ONETARGETINFO_H

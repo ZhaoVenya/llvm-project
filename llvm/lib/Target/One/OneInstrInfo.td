@@ -1,5 +1,10 @@
 include "OneInstrFormats.td"
 
+
+// SDTNone 表示这个 DAG 节点不产生任何值。它通常只用于其副作用（side effect），例如修改寄存器状态、控制流等
+// SDNPHasChain: 表示这个节点是链 (Chain) 敏感的。
+// SDNPOptInGlue: 表示这个节点是可选的粘合 (Glue) 输出
+// SDNPVariadic: 表示这个节点是变参的（Variadic）
 def retglue : SDNode<"OneISD::RET_GLUE", SDTNone, [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
 //class ImmLeaf<ValueType vt, code pred, SDNodeXForm xform = NOOP_SDNodeXForm,
@@ -85,16 +90,19 @@ def SRAI  : ArithLogicI<"srai", sra>;
 class ArithLogicR<string inst, SDNode node> : R<
     (outs GPR:$rd),
     (ins GPR:$rs1, GPR:$rs2),
+    // !strconcat 的意思就是调用 strconcat这个函数，把函数内的字符串拼接起来
+    // 比如：!strconcat("add", "\t$rd, $rs1, $rs2"),就是 add    $rd,$rs1,$rs2
     !strconcat(inst, "\t$rd, $rs1, $rs2"),
     [(set GPR:$rd, (node GPR:$rs1, GPR:$rs2))]
-    >;
+>;
+
 def ADD : ArithLogicR<"add", add>;
 def SUB : ArithLogicR<"sub", sub>;
 def MUL : ArithLogicR<"mul", mul>;
 def DIV : ArithLogicR<"div", sdiv>;
 def REM : ArithLogicR<"rem", srem>;
 def AND : ArithLogicR<"and", and>;
-def OR : ArithLogicR<"or", or>;
+def OR  : ArithLogicR<"or", or>;
 def XOR : ArithLogicR<"xor", xor>;
 def SLL : ArithLogicR<"sll", shl>;
 def SRL : ArithLogicR<"srl", srl>;

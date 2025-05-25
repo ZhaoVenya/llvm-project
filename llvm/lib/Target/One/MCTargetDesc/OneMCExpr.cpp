@@ -7,23 +7,25 @@
 
 using namespace llvm;
 
+// 这个 void OneMCExpr::printImpl(...) 函数
+// 是 OneMCExpr 类的核心方法，负责将这种自定义的机器码表达式（MC Expression）打印成文本汇编格式。
 void OneMCExpr::printImpl(raw_ostream &OS, const MCAsmInfo *MAI) const {
-  switch (Kd) {
-      case HI: OS << "%hi("; break;
+    switch (Kd) {
+        case HI: OS << "%hi("; break;
 
-      case LO: OS << "%lo("; break;
+        case LO: OS << "%lo("; break;
 
-      default: break;
-  }
-  Expr->print(OS, MAI, true);
+        default: break;
+    }
+    Expr->print(OS, MAI, true);
 
-  switch (Kd) {
+    switch (Kd) {
 
-      case HI:
+        case HI:
 
-      case LO: OS << ")"; break;
+        case LO: OS << ")"; break;
 
-      default: break;
-      
-  }
+        default: break;
+        
+    }
 }

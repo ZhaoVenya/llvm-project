@@ -18,6 +18,8 @@ using namespace llvm;
 #include "OneGenMCPseudoLowering.inc"
 
 
+// OneAsmPrinter 负责生成 MCInst，并决定它们应该如何组合成一个完整的汇编文件
+
 // 这是 OneAsmPrinter 这个 Pass 的入口点。
 // 当 LLVM 的 Pass Manager 运行 AsmPrinter Pass 时，
 // 它会调用这个函数来处理当前的 MachineFunction

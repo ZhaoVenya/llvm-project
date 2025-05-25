@@ -11,28 +11,30 @@
 #include "llvm/Target/TargetMachine.h"
 namespace llvm {
 
-class OneSubtarget;
-class OneAsmPrinter : public AsmPrinter {
-public:
-  const OneSubtarget *Subtarget;
-  explicit OneAsmPrinter(TargetMachine &TM,
-                         std::unique_ptr<MCStreamer> Streamer)
-      : AsmPrinter(TM, std::move(Streamer)) {
-    Subtarget = static_cast<OneTargetMachine &>(TM).getSubtargetImpl();
-  }
+    class OneSubtarget;
 
-  StringRef getPassName() const override { return "One Assembly Printer"; }
+    class OneAsmPrinter : public AsmPrinter {
+        public:
+            const OneSubtarget *Subtarget;
+            explicit OneAsmPrinter(TargetMachine &TM,
+                                  std::unique_ptr<MCStreamer> Streamer)
+                : AsmPrinter(TM, std::move(Streamer)) {
+              Subtarget = static_cast<OneTargetMachine &>(TM).getSubtargetImpl();
+            }
 
-  virtual bool runOnMachineFunction(MachineFunction &MF) override;
+            StringRef getPassName() const override { return "One Assembly Printer"; }
 
-  void emitInstruction(const MachineInstr *MI) override;
+            virtual bool runOnMachineFunction(MachineFunction &MF) override;
 
-  bool lowerOperand(const MachineOperand &MO, MCOperand &MCO) const;
-private:
-  bool lowerPseudoInstExpansion(const MachineInstr *MI, MCInst &Inst);
-  void lowerToMCInst(const MachineInstr *MI, MCInst &Out);
-  MCOperand lowerSymbolOperand(const MachineOperand &MO) const;
-};
+            void emitInstruction(const MachineInstr *MI) override;
+
+            bool lowerOperand(const MachineOperand &MO, MCOperand &MCO) const;
+
+        private:
+            bool lowerPseudoInstExpansion(const MachineInstr *MI, MCInst &Inst);
+            void lowerToMCInst(const MachineInstr *MI, MCInst &Out);
+            MCOperand lowerSymbolOperand(const MachineOperand &MO) const;
+    };
 } // namespace llvm
 
 #endif // ONEASMPRINTER_H

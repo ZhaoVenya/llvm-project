@@ -12,7 +12,7 @@ bool CC_One(unsigned ValNo, MVT ValVT, MVT LocVT,
               CCValAssign::LocInfo LocInfo, ISD::ArgFlagsTy ArgFlags,
               CCState &State);
 
-}
+} // namespace llvm
 
 
 #endif //ONECALLINGCONV_H

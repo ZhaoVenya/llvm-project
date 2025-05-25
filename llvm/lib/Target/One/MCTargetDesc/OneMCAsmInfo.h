@@ -12,9 +12,9 @@ namespace llvm {
 class Triple;
 
 class OneMCAsmInfo : public MCAsmInfoELF {
-public:
-  explicit OneMCAsmInfo(const Triple &TargetTriple);
-};
+    public:
+        explicit OneMCAsmInfo(const Triple &TargetTriple);
+    };
 } // namespace llvm
 
 #endif // ONEMCASMINFO_H

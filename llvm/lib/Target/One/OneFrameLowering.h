@@ -7,27 +7,30 @@
 
 #include "llvm/CodeGen/TargetFrameLowering.h"
 namespace llvm {
-class OneSubtarget;
-class OneFrameLowering : public TargetFrameLowering {
-  const OneSubtarget &STI;
+    class OneSubtarget;
 
-public:
-  explicit OneFrameLowering(const OneSubtarget &STI)
-      : TargetFrameLowering(TargetFrameLowering::StackGrowsDown, Align(16), 0,
-                            Align(16)),
-        STI(STI) {}
-  void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+    class OneFrameLowering : public TargetFrameLowering {
+        const OneSubtarget &STI;
 
-  void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+        public:
+            explicit OneFrameLowering(const OneSubtarget &STI)
+                : TargetFrameLowering(TargetFrameLowering::StackGrowsDown, Align(16), 0,
+                                      Align(16)),STI(STI) {
+                
+            }
 
-  void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs, RegScavenger *RS) const override;
+            void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-protected:
-  bool hasFPImpl(const MachineFunction &MF) const override;
+            void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-private:
-  uint64_t computeStateSize(MachineFunction &MF) const;
-};
+            void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs, RegScavenger *RS) const override;
+
+        protected:
+            bool hasFPImpl(const MachineFunction &MF) const override;
+
+        private:
+            uint64_t computeStateSize(MachineFunction &MF) const;
+    };
 } // namespace llvm
 
 #endif // ONEFRAMELOWERING_H

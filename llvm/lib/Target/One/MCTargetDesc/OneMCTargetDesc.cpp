@@ -37,42 +37,42 @@ using namespace llvm;
 
 MCAsmInfo *createOneMCAsmInfo(const MCRegisterInfo &MRI, const Triple &TT,
                               const MCTargetOptions &Options) {
-  return new OneMCAsmInfo(TT);
+    return new OneMCAsmInfo(TT);
 }
 
 MCRegisterInfo *createOneMCRegisterInfo(const Triple &TT) {
-  MCRegisterInfo *X = new MCRegisterInfo();
-  InitOneMCRegisterInfo(X, One::RA);
-  return X;
+    MCRegisterInfo *X = new MCRegisterInfo();
+    InitOneMCRegisterInfo(X, One::RA);
+    return X;
 }
 
 MCInstrInfo *createOneMCInstrInfo() {
-  MCInstrInfo *X = new MCInstrInfo();
-  InitOneMCInstrInfo(X);
-  return X;
+    MCInstrInfo *X = new MCInstrInfo();
+    InitOneMCInstrInfo(X);
+    return X;
 }
 
 MCInstPrinter *createOneMCInstPrinter(const Triple &T, unsigned SyntaxVariant,
                                       const MCAsmInfo &MAI,
                                       const MCInstrInfo &MII,
                                       const MCRegisterInfo &MRI) {
-  return new OneInstPrinter(MAI, MII, MRI);
+    return new OneInstPrinter(MAI, MII, MRI);
 }
 
 MCSubtargetInfo *createOneMCSubtargetInfo(const Triple &TT, StringRef CPU,
                                           StringRef FS) {
-  if (CPU.empty()) {
-    CPU = "one";
-  }
-  return createOneMCSubtargetInfoImpl(TT, CPU, CPU, FS);
+    if (CPU.empty()) {
+        CPU = "one";
+    }
+    return createOneMCSubtargetInfoImpl(TT, CPU, CPU, FS);
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeOneTargetMC() {
-  TargetRegistry::RegisterMCAsmInfo(getTheOneTarget(), createOneMCAsmInfo);
-  TargetRegistry::RegisterMCRegInfo(getTheOneTarget(), createOneMCRegisterInfo);
-  TargetRegistry::RegisterMCInstrInfo(getTheOneTarget(), createOneMCInstrInfo);
-  TargetRegistry::RegisterMCSubtargetInfo(getTheOneTarget(),
-                                          createOneMCSubtargetInfo);
-  TargetRegistry::RegisterMCInstPrinter(getTheOneTarget(),
-                                        createOneMCInstPrinter);
+    TargetRegistry::RegisterMCAsmInfo(getTheOneTarget(), createOneMCAsmInfo);
+    TargetRegistry::RegisterMCRegInfo(getTheOneTarget(), createOneMCRegisterInfo);
+    TargetRegistry::RegisterMCInstrInfo(getTheOneTarget(), createOneMCInstrInfo);
+    TargetRegistry::RegisterMCSubtargetInfo(getTheOneTarget(),
+                                            createOneMCSubtargetInfo);
+    TargetRegistry::RegisterMCInstPrinter(getTheOneTarget(),
+                                          createOneMCInstPrinter);
 }

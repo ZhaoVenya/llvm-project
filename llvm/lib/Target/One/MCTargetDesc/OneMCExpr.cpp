@@ -9,23 +9,21 @@ using namespace llvm;
 
 void OneMCExpr::printImpl(raw_ostream &OS, const MCAsmInfo *MAI) const {
   switch (Kd) {
-  case HI:
-    OS << "%hi(";
-    break;
-  case LO:
-    OS << "%lo(";
-    break;
-  default:
-    break;
+      case HI: OS << "%hi("; break;
+
+      case LO: OS << "%lo("; break;
+
+      default: break;
   }
   Expr->print(OS, MAI, true);
 
   switch (Kd) {
-  case HI:
-  case LO:
-    OS << ")";
-    break;
-  default:
-    break;
+
+      case HI:
+
+      case LO: OS << ")"; break;
+
+      default: break;
+      
   }
 }

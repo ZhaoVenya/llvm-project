@@ -689,6 +689,10 @@ def SRAI : Shift_ri<0b01000, 0b101, "srai">,
 
 def ADD  : ALU_rr<0b0000000, 0b000, "add", Commutable=1>,
            Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+
+def BSW  : ALU_rr<0b1100001, 0b000, "bsw", Commutable=1>,
+           Sched<[WriteIALU, ReadIALU, ReadIALU]>;// 这个是我添加的
+
 def SUB  : ALU_rr<0b0100000, 0b000, "sub">,
            Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SLL  : ALU_rr<0b0000000, 0b001, "sll">,
@@ -1303,6 +1307,7 @@ def 33signbits_node : PatLeaf<(i64 GPR:$src), [{
 /// Simple arithmetic operations
 
 def : PatGprGpr<add, ADD>;
+// def : PatGprGpr<bsw, BSW>;
 def : PatGprSimm12<add, ADDI>;
 def : PatGprGpr<sub, SUB>;
 def : PatGprGpr<or, OR>;

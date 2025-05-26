@@ -2792,6 +2792,40 @@ bool RISCVAsmParser::parseInstruction(ParseInstructionInfo &Info,
   // First operand is token for instruction
   Operands.push_back(RISCVOperand::createToken(Name, NameLoc));
 
+  // Check if the instruction is BSW
+  if (Name == "bsw") {
+    // Expected format: bsw rd, rs1, rs2
+
+    // Parse rd (destination register)
+    if (parseRegister(Operands)) return true; // Error parsing rd
+
+    // Expect a comma after rd
+    if (!parseOptionalToken(AsmToken::Comma)) {
+      Error(getLexer().getLoc(), "expected comma after destination register");
+      return true;
+    }
+
+    // Parse rs1 (source register 1)
+    if (parseRegister(Operands)) return true; // Error parsing rs1
+
+    // Expect a comma after rs1
+    if (!parseOptionalToken(AsmToken::Comma)) {
+      Error(getLexer().getLoc(), "expected comma after first source register");
+      return true;
+    }
+
+    // Parse rs2 (source register 2)
+    if (parseRegister(Operands)) return true; // Error parsing rs2
+
+    // After parsing all 3 operands, ensure it's end of statement
+    if (getParser().parseEOL("unexpected token")) {
+      getParser().eatToEndOfStatement();
+      return true;
+    }
+    return false; // Successfully parsed BSW instruction
+  }
+
+
   // If there are no more operands, then finish
   if (getLexer().is(AsmToken::EndOfStatement)) {
     getParser().Lex(); // Consume the EndOfStatement.

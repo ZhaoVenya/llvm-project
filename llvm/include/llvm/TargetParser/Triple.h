@@ -104,6 +104,7 @@ public:
     wasm64,         // WebAssembly with 64-bit pointers
     renderscript32, // 32-bit RenderScript
     renderscript64, // 64-bit RenderScript
+    day,
     ve,             // NEC SX-Aurora Vector Engine
     LastArchType = ve
   };
@@ -1027,6 +1028,8 @@ public:
 
   /// Tests whether the target is 32-bit RISC-V.
   bool isRISCV32() const { return getArch() == Triple::riscv32; }
+
+  bool isDay() const { return getArch() == Triple::day; }
 
   /// Tests whether the target is 64-bit RISC-V.
   bool isRISCV64() const { return getArch() == Triple::riscv64; }

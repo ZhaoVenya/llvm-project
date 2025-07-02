@@ -11,7 +11,7 @@ Target &llvm::getTheDayTarget() {
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeDayTargetInfo() {
   RegisterTarget<Triple::day,
-                 /*HasJIT=*/true>
+                 /*HasJIT=*/false>
       X(getTheDayTarget(), "day", "Day (32-bit little endian)", "Day");
 }
 

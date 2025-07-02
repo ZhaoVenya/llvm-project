@@ -1951,6 +1951,7 @@ Triple Triple::getBigEndianArchVariant() const {
   // drop any arch suffixes.
   case Triple::arm:
   case Triple::thumb:
+  case Triple::day:
     T.setArch(UnknownArch);
     break;
 
@@ -2055,6 +2056,7 @@ bool Triple::isLittleEndian() const {
   case Triple::x86_64:
   case Triple::xcore:
   case Triple::xtensa:
+  case Triple::day:
     return true;
   default:
     return false;

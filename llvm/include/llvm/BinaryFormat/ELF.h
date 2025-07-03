@@ -323,6 +323,7 @@ enum {
   EM_VE = 251,            // NEC SX-Aurora VE
   EM_CSKY = 252,          // C-SKY 32-bit processor
   EM_LOONGARCH = 258,     // LoongArch
+  EM_DAY = 260,
 };
 
 // Object file classes.
@@ -953,6 +954,11 @@ enum : unsigned {
 // ELF Relocation types for BPF
 enum {
 #include "ELFRelocs/BPF.def"
+};
+
+// ELF Relocation types for RISCVN   //新增代码
+enum {                               //新增代码
+#include "ELFRelocs/Day.def"         //新增代码
 };
 
 // ELF Relocation types for M68k

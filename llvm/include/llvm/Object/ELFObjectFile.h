@@ -1362,7 +1362,7 @@ template <class ELFT> Triple::ArchType ELFObjectFile<ELFT>::getArch() const {
   bool IsLittleEndian = ELFT::Endianness == llvm::endianness::little;
   switch (EF.getHeader().e_machine) {
   case ELF::EM_DAY:
-    return Triple::EM_Day;
+    return Triple::day;
   case ELF::EM_68K:
     return Triple::m68k;
   case ELF::EM_386:

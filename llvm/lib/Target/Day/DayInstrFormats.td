@@ -129,10 +129,10 @@ class I_Form<bits<4> opcode, bits<14> imm14_val>
     let Inst{3-0}   = DayTypeI.Code; // I类型指令的类型字段码
 };
 
-class L_Form<bits<4> opcode, bits<16> imm16_val>
+class L_Form<bits<4> opcode, bits<14> imm14_val>
     : DayInst<(outs GPR:$rd), (ins GPR:$rs1), "", [], DayTypeL, InstFormatL> {
     // 定义L_Form特有的字段
-    field bits<14> imm = imm16_val{15-2}; // 立即数值
+    field bits<14> imm = imm14_val{13-0}; // 立即数值
     field bits<5> rs1;
     field bits<5> rd;
     field bits<4> Opcode = opcode; // L类型指令的操作码
@@ -147,10 +147,10 @@ class L_Form<bits<4> opcode, bits<16> imm16_val>
 };
 
 //
-class S_Form<bits<4> opcode, bits<16> imm16_val>
+class S_Form<bits<4> opcode, bits<14> imm14_val>
     : DayInst<(outs), (ins GPR:$rs1, GPR:$rs2), "", [], DayTypeS, InstFormatS> {
     // 定义S_Form特有的字段
-    field bits<14> imm = imm16_val{15-2}; // 立即数值
+    field bits<14> imm = imm14_val{13-0}; // 立即数值
     field bits<5> rs1;
     field bits<5> rs2;
     field bits<4> Opcode = opcode; // S类型指令的操作码
@@ -180,6 +180,8 @@ class B_Form<bits<4> opcode, bits<16> imm16_val>
     // 在这里将 DayInstrType 映射到 Inst 的位上
     let Inst{3-0}   = DayTypeB.Code; // B类型指令的类型字段码
 };
+
+//// 需要修改U指令和J指令的定义
 
 class U_Form<bits<4> opcode, bits<32> imm32_val>
     : DayInst<(outs GPR:$rd), (), "", [], DayTypeU, InstFormatU> {
@@ -222,6 +224,7 @@ class DayInstR<bits<4> opcode, bits<4> func4_val, string asmstr> : \
 class DayInstR4<bits<4> opcode, bits<4> func4_val, string asmstr> : \
     R4_Form<opcode, func4_val>{
     let AsmString = asmstr;
+    let Pattern = [];
 };
 
 class DayInstI<bits<4> opcode, bits<14> imm14_val, string asmstr>
@@ -229,19 +232,25 @@ class DayInstI<bits<4> opcode, bits<14> imm14_val, string asmstr>
     let AsmString = asmstr;
 };
 
-class DayInstL<bits<4> opcode, bits<16> imm16_val, string asmstr>
-    : L_Form<opcode, imm16_val>{
+class DayInstL<bits<4> opcode, bits<14> imm14_val, string asmstr>
+    : L_Form<opcode, imm14_val>{
     let AsmString = asmstr;
+    let Defs = [GPR:$rd];
+    let Uses = [GPR:$rs1];
 };
 
-class DayInstS<bits<4> opcode, bits<16> imm16_val, string asmstr>
-    : S_Form<opcode, imm16_val>{
+class DayInstS<bits<4> opcode, bits<14> imm14_val, string asmstr>
+    : S_Form<opcode, imm14_val>{
     let AsmString = asmstr;
+    let Defs = [];
+    let Uses = [GPR:$rs1, GPR:$rs2];
 };
 
 class DayInstB<bits<4> opcode, bits<16> imm16_val, string asmstr>
     : B_Form<opcode, imm16_val>{
     let AsmString = asmstr;
+    let Defs = []; // 分支指令通常没有输出寄存器
+    let Uses = [GPR:$rs1, GPR:$rs2]; // 比较操作数
 };
 
 class DayInstU<bits<4> opcode, bits<32> imm32_val, string asmstr>

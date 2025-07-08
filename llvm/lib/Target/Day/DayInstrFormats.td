@@ -181,7 +181,6 @@ class B_Form<bits<4> opcode, bits<16> imm16_val>
     let Inst{3-0}   = DayTypeB.Code; // B类型指令的类型字段码
 };
 
-//// 需要修改U指令和J指令的定义
 
 class U_Form<bits<4> opcode, bits<32> imm32_val>
     : DayInst<(outs GPR:$rd), (), "", [], DayTypeU, InstFormatU> {

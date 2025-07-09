@@ -54,7 +54,7 @@ def DayTypeU      : DayTypeCode<"U",  0b0111>;
 def DayTypeJ      : DayTypeCode<"J",  0b1000>;
 
 // 
-class DayInst<dag outs, dag ins, string asmstr, list<dag> pattern, DayTypeCode daytype, InstFormat instrformat>:Instruction{
+class DayInst<dag outs, dag ins, string asmstr, DayTypeCode daytype, InstFormat instrformat>:Instruction{
 
     field bits<32> SoftFail = 0;
     field bits<32> Inst;
@@ -65,13 +65,13 @@ class DayInst<dag outs, dag ins, string asmstr, list<dag> pattern, DayTypeCode d
     dag OutOperandList = outs;
     dag InOperandList = ins;
     let AsmString = asmstr;
-    let Pattern = pattern;
+    let Pattern = [];
 }
 
 
 // 定义R类型指令的格式
 class R_Form<bits<4> opcode, bits<4> func4_val, bits<5> func5_val>
-    : DayInst<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), "", [], DayTypeR, InstFormatR> {
+    : DayInst<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), "", DayTypeR, InstFormatR> {
     // 定义R_Form特有的字段
     field bits<4> func4 = func4_val;
     field bits<5> func5 = func5_val;
@@ -93,7 +93,7 @@ class R_Form<bits<4> opcode, bits<4> func4_val, bits<5> func5_val>
 
 // 定义R4类型指令的格式
 class R4_Form<bits<4> opcode, bits<4> func4_val>
-    : DayInst<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2, GPR:$rs3), "", [], DayTypeR4, InstFormatR4> {
+    : DayInst<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2, GPR:$rs3), "",DayTypeR4, InstFormatR4> {
     // 定义R4_Form特有的字段
     field bits<4> func4 = func4_val;
     field bits<5> rs3;
@@ -113,7 +113,7 @@ class R4_Form<bits<4> opcode, bits<4> func4_val>
 }
 
 class I_Form<bits<4> opcode, bits<14> imm14_val>
-    : DayInst<(outs GPR:$rd), (ins GPR:$rs1), "", [], DayTypeI, InstFormatI> {
+    : DayInst<(outs GPR:$rd), (ins GPR:$rs1), "", DayTypeI, InstFormatI> {
     // 定义I_Form特有的字段
     field bits<14> imm = imm14_val; // 立即数值
     field bits<5> rs1;
@@ -130,7 +130,7 @@ class I_Form<bits<4> opcode, bits<14> imm14_val>
 };
 
 class L_Form<bits<4> opcode, bits<14> imm14_val>
-    : DayInst<(outs GPR:$rd), (ins GPR:$rs1), "", [], DayTypeL, InstFormatL> {
+    : DayInst<(outs GPR:$rd), (ins GPR:$rs1), "",DayTypeL, InstFormatL> {
     // 定义L_Form特有的字段
     field bits<14> imm = imm14_val{13-0}; // 立即数值
     field bits<5> rs1;
@@ -148,7 +148,7 @@ class L_Form<bits<4> opcode, bits<14> imm14_val>
 
 //
 class S_Form<bits<4> opcode, bits<14> imm14_val>
-    : DayInst<(outs), (ins GPR:$rs1, GPR:$rs2), "", [], DayTypeS, InstFormatS> {
+    : DayInst<(outs), (ins GPR:$rs1, GPR:$rs2), "",DayTypeS, InstFormatS> {
     // 定义S_Form特有的字段
     field bits<14> imm = imm14_val{13-0}; // 立即数值
     field bits<5> rs1;
@@ -165,7 +165,7 @@ class S_Form<bits<4> opcode, bits<14> imm14_val>
 };
 
 class B_Form<bits<4> opcode, bits<16> imm16_val>
-    : DayInst<(outs), (ins GPR:$rs1, GPR:$rs2), "", [], DayTypeB, InstFormatB> {
+    : DayInst<(outs), (ins GPR:$rs1, GPR:$rs2), "", DayTypeB, InstFormatB> {
     // 定义B_Form特有的字段
     field bits<14> imm = imm16_val{15-2}; // 立即数值
     field bits<5> rs1;
@@ -183,7 +183,7 @@ class B_Form<bits<4> opcode, bits<16> imm16_val>
 
 
 class U_Form<bits<4> opcode, bits<32> imm32_val>
-    : DayInst<(outs GPR:$rd), (), "", [], DayTypeU, InstFormatU> {
+    : DayInst<(outs GPR:$rd), (), "", DayTypeU, InstFormatU> {
     // 定义U_Form特有的字段
     field bits<18> imm = imm32_val{31-14}; // 立即数值
     field bits<5> rd;
@@ -200,7 +200,7 @@ class U_Form<bits<4> opcode, bits<32> imm32_val>
 
 
 class J_Form<bits<4> opcode, bits<32> imm32_val>
-    : DayInst<(outs GPR:$rd), (), "", [], DayTypeJ, InstFormatJ> {
+    : DayInst<(outs GPR:$rd), (), "", DayTypeJ, InstFormatJ> {
     // 定义J_Form特有的字段
     field bits<25> imm = imm32_val{25-0}; // 立即数值
     field bits<5> rd;

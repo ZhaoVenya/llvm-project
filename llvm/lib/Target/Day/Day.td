@@ -1,7 +1,8 @@
 include "llvm/Target/Target.td"
 include "DayRegisterInfo.td"
-include "DayInstrInfo.td"
-include "DayCallingConv.td"
+// include "DayInstrInfo.td"
+// include "DayCallingConv.td"
+
 
 def DayInstrInfo : InstrInfo {
     let isLittleEndianEncoding = true;
@@ -25,8 +26,4 @@ def Day : Target {
 }
 
 
-
-def DayTarget : Target{
-    let InstructionSet = DayInstrInfo;
-}
 

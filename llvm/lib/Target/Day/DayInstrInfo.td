@@ -1,182 +1,138 @@
-/************************************************************\
-    * File: llvm/lib/Target/Day/DayInstrInfo.td
-    * Description: Instruction information for the Day architecture.
-\************************************************************/
+// /************************************************************\
+//     * File: llvm/lib/Target/Day/DayInstrInfo.td
+//     * Description: Instruction information for the Day architecture.
+// \************************************************************/
 
-include "llvm/Target/Day/DayInstrFormats.td"
-include "llvm/Target/Day/DayRegisterInfo.td"
+include "DayInstrFormats.td"
 
 
-class DayR_I_2_Op<
-    bits<4> opcode,
-    string mnemonic,
-    SDNode OpNode
-> : DayInstR<opcode, Func4.func4_int, (mnemonic # " $rd, $rs1, $rs2")> {
-    // 自动生成模式
+class ALU_RR_I<string asmstr, bits<4> opcode, SDNode OpNode> : 
+        DayInstR_I<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), 
+        asmstr, "$rd, $rs1, $rs2", 
+        opcode>
+{
     let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1, GPR:$rs2))];
 }
 
-class DayR_F_2_Op<
-    bits<4> opcode,
-    string mnemonic,
-    SDNode OpNode
-> : DayInstR<opcode, Func4.func4_float, (mnemonic # " $rd, $rs1, $rs2")> {
-    // 自动生成模式
-    let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1, GPR:$rs2))];
-}
-
-class DayR_I_NOT<
-    bits<4> opcode,
-    string mnemonic,
-    SDNode OpNode
-> : DayInstR<opcode, Func4.func4_int, (mnemonic # " $rd, $rs1, ZERO")> {
-    let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1))];// 这个Pat是DAG中的，不是平台汇编的Pat
+class ALU_RR_F<string asmstr, bits<4> opcode, SDNode OpNode> : 
+        DayInstR_F<(outs FPR:$rd), (ins FPR:$rs1, FPR:$rs2), 
+        asmstr, "$rd, $rs1, $rs2", 
+        opcode>
+{
+    let Pattern = [(set FPR:$rd, (OpNode FPR:$rs1, FPR:$rs2))];
 }
 
 
-//////// 整数运算，逻辑运算等
-def ADD : DayR_I_2_Op<0b0000, "add", add>;
-def SUB : DayR_I_2_Op<0b0001, "sub", sub>;
-def MUL : DayR_I_2_Op<0b0010, "mul", mul>;
-def DIV : DayR_I_2_Op<0b0011, "div", sdiv>;
-def SLT : DayR_I_2_Op<0b0100, "slt", setlt>;
-def SLTU: DayR_I_2_Op<0b0101, "sltu", setult>;
+class ALU_R4_I<string asmstr, bits<4> opcode> : 
+        DayInstR4_I<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2, GPR:$rs3), 
+        asmstr, "$rd, $rs1, $rs2, $rs3", 
+        opcode>;
 
-def AND : DayR_I_2_Op<0b0110, "and", and>;
-def OR  : DayR_I_2_Op<0b0111, "or", or>;
-def XOR : DayR_I_2_Op<0b1000, "xor", xor>;
-def NOT : DayR_I_NOT <0b1001, "not", ISD.NOT>; //// 
-def SLL : DayR_I_2_Op<0b1010, "sll", shl>;
-def SRL : DayR_I_2_Op<0b1011, "srl", srl>;
-def SRA : DayR_I_2_Op<0b1100, "sra", sra>;
+class ALU_R4_F<string asmstr, bits<4> opcode> : 
+        DayInstR4_F<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2, GPR:$rs3), 
+        asmstr, "$rd, $rs1, $rs2, $rs3", 
+        opcode>;
 
-//////// 浮点数运算
-def ADDF : DayR_F_2_Op<0b0000, "addf", fadd>;
-def SUBF : DayR_F_2_Op<0b0001, "subf", fsub>;
-def MULF : DayR_F_2_Op<0b0010, "mulf", fmul>;
-def DIVF : DayR_F_2_Op<0b0011, "divf", fdiv>;
-def SLTF : DayR_F_2_Op<0b0100, "sltf", setolt>;
+class ALU_I<string asmstr, bits<4> opcode> : 
+        DayInstI<(outs GPR:$rd), (ins GPR:$rs1), 
+        asmstr, "$rd, $rs1", 
+        opcode>;
 
+class ALU_L<string asmstr, bits<4> opcode> : 
+        DayInstL<(outs GPR:$rd), (ins GPR:$rs1), 
+        asmstr, "$rd, $rs1", 
+        opcode>;
 
-//////// 这个地方需要定义R4类型，包括整数操作和浮点数操作
-def MPAP : DayInstR4<0b0011, Func4.func4_int, "mpap $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
-def MPAN : DayInstR4<0b0100, Func4.func4_int, "mpan $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
-def MNAP : DayInstR4<0b0101, Func4.func4_int, "mnap $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
-def MNAN : DayInstR4<0b0110, Func4.func4_int, "mnan $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
-def BITSW: DayInstR4<0b0111, Func4.func4_int, "bitsw $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
-def BYTESW: DayInstR4<0b1000, Func4.func4_int, "bytesw $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
+class ALU_S<string asmstr, bits<4> opcode> : 
+        DayInstS<(outs), (ins GPR:$rs1, GPR:$rs2), 
+        asmstr, "$rs1, $rs2", 
+        opcode>;
 
-def MPAPF : DayInstR4<0b0011, Func4.func4_float, "mpapf $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
-def MPANF : DayInstR4<0b0100, Func4.func4_float, "mpanf $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
-def MNAPF : DayInstR4<0b0101, Func4.func4_float, "mnapf $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
-def MNANF : DayInstR4<0b0110, Func4.func4_float, "mnanf $rd, $rs1, $rs2, $rs3">; // 内联汇编用到的指令，所以selectiondag中没有对应的SDNODE
+class ALU_B<string asmstr, bits<4> opcode> : 
+        DayInstB<(outs), (ins GPR:$rs1, GPR:$rs2), 
+        asmstr, "$rs1, $rs2", 
+        opcode>;
 
-//////// 这个地方需要定义I类型，包括整数操作和浮点数操作
-class DayI_I_2_Op<
-    bits<4> opcode,
-    string mnemonic,
-    SDNode OpNode
-> : DayInstI<opcode, Func4.func4_int, (mnemonic # " $rd, $rs1, $imm14")>
-{
-    let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1, simm14:$imm14))];
-};
+class ALU_U<string asmstr, bits<4> opcode> : 
+        DayInstU<(outs GPR:$rd), (ins), 
+        asmstr, "$rd", 
+        opcode>;
 
-def ADDI : DayI_I_2_Op<0b0000, "addi",  add>;
-def SUBI : DayI_I_2_Op<0b0001, "subi",  sub>;
-def MULI : DayI_I_2_Op<0b0010, "muli",  mul>;
-def DIVI : DayI_I_2_Op<0b0011, "divi",  sdiv>;
-def SLTI : DayI_I_2_Op<0b0100, "slti",  setlt>;
-def SLTIU: DayI_I_2_Op<0b0101, "sltiu", setult>;
-def ANDI : DayI_I_2_Op<0b0110, "andi",  and>;
-def ORI  : DayI_I_2_Op<0b0111, "ori",   or>;
-def XORI : DayI_I_2_Op<0b1000, "xori",  xor>;
+class ALU_J<string asmstr> : 
+        DayInstJ<(outs GPR:$rd), (ins), 
+        asmstr, "$rd">;
 
+//////////////////////////////////////////////////////////////////////////////////////
 
-// def NOTI : DayI_I_2_Op<0b0000, "noti", add>; //// 立即数取反不要了，因为可以被生成一个常数
-def JALR : DayInstI<0b1010, Func4.func4_int, "jalr $rd, $rs1, $imm14"> {
-    let Pattern = [(set GPR:$rd, (add (get_pc), 4)), // 将 PC+4 写入 rd
-                     (brind (add GPR:$rs1, simm14:$imm14)) // 无条件间接跳转
-                    ];
-    let isBranch = 1;
-    let isTerminator = 1;
-    let isIndirectBranch = 1;
-}
+def ADD : ALU_RR_I<"add", 0b0000, add>;
+def SUB : ALU_RR_I<"sub", 0b0001, sub>;
+def MUL : ALU_RR_I<"mul", 0b0010, mul>;
+def DIV : ALU_RR_I<"div", 0b0011, sdiv>;
+// def SLT : ALU_RR_I<"slt", 0b0100>;
+// def SLTU : ALU_RR_I<"sltu", 0b0101>;
+def AND : ALU_RR_I<"and", 0b0110, and>;
+def OR  : ALU_RR_I<"or",  0b0111, or>;
+def XOR : ALU_RR_I<"xor", 0b1000, xor>;
+// def NOT : ALU_RR_I<"not", 0b1001>;
+// def SLL : ALU_RR_I<"sll", 0b1010>;
+// def SRL : ALU_RR_I<"srl", 0b1011>;
+// def SRA : ALU_RR_I<"sra", 0b1100>;
 
-// L类型指令
-class DayL_I_2_Op<
-    bits<4> opcode,
-    string mnemonic,
-    ValueType VT,
-    SDNode  OpNode
-> : DayInstL<opcode, Func4.func4_int, (mnemonic # " $rd, $rs1($imm14)")>
-{
-    let Pattern = [(set GPR:$rd, (OpNode VT, (add GPR:$rs1, simm14:$imm14)))];
-};
-
-def LB : DayL_I_2_Op<0b0000, "lb", i8,    ISD.LOAD>;
-def LH : DayL_I_2_Op<0b0001, "lh", i16,   ISD.LOAD>;
-def LW : DayL_I_2_Op<0b0010, "lw", i32,   ISD.LOAD>;
-def LBU : DayL_I_2_Op<0b0011, "lbu", i8,  ISD.ZEXTLOAD>;
-def LHU : DayL_I_2_Op<0b0100, "lhu", i16, ISD.ZEXTLOAD>;
-def LWU : DayL_I_2_Op<0b0101, "lwu", i32, ISD.LOAD>;
+def ADDF: ALU_RR_F<"addf", 0b0000, fadd>;
+def SUBF: ALU_RR_F<"subf", 0b0001, fsub>;
+def MULF: ALU_RR_F<"mulf", 0b0010, fmul>;
+def DIVF: ALU_RR_F<"divf", 0b0011, fdiv>;
+// def SLTF: ALU_RR_F<"sltf", 0b0100, setlt>;
 
 
-// S类型指令
-class DayS_I_2_Op<
-    bits<4> opcode,
-    string mnemonic,
-    ValueType VT
->:DayInstS<opcode, Func4.func4_int, (mnemonic # " $rs1($imm14), $rs2")>
-{
-    let Pattern = [(ISD.STORE VT, GPR:$rs2, (add GPR:$rs1, simm14:$imm14))];
-};
+// def MPAP: ALU_R4_I<"mpap", 0b0011>;
+// def MPAN: ALU_R4_I<"mpan", 0b0100>;
+// def MNAP: ALU_R4_I<"mnap", 0b0101>;
+// def MNAN: ALU_R4_I<"mnan", 0b0110>;
+// def BITSW: ALU_R4_I<"bitsw", 0b0111>;
+// def BYTESW: ALU_R4_I<"bytesw", 0b1000>;
 
-def SB : DayS_I_2_Op<0b0000, "sb", i8>;
-def SH : DayS_I_2_Op<0b0001, "sh", i16>;
-def SW : DayS_I_2_Op<0b0010, "sw", i32>;
+// def MPAPF: ALU_R4_F<"mpapf", 0b0011>;
+// def MPANF: ALU_R4_F<"mpanf", 0b0100>;
+// def MNAPF: ALU_R4_F<"mnapf", 0b0101>;
+// def MNANF: ALU_R4_F<"mnanf", 0b0110>;
+
+
+// def ADDI: ALU_I<"addi", 0b0000, add>;
+// def SUBI: ALU_I<"subi", 0b0001, sub>;
+// def MULI: ALU_I<"muli", 0b0010, mul>;
+// def DIVI: ALU_I<"divi", 0b0011, divs>;
+// def SLTI: ALU_I<"slti", 0b0100>;
+// def SLTIU: ALU_I<"sltiu", 0b0101>;
+// def ANDI: ALU_I<"andi", 0b0110, and>;
+// def ORI : ALU_I<"ori",  0b0111, or>;
+// def XORI: ALU_I<"xori", 0b1000, xor>;
+// def JALR: ALU_I<"jalr", 0b1010>;
 
 
 
-// B类型指令
-class DayB_I_2_Op<
-    bits<4> opcode,
-    string mnemonic,
-    PatFrag CompareOp
->:DayInstB<opcode, Func4.func4_int, (mnemonic # " $rs1, $rs2, $target")>{
-    let Pattern = [(brcond (CompareOp GPR:$rs1, GPR:$rs2), bb_operand:$target)];
-};
 
-def BEQ : DayB_I_2_Op<0b0000, "beq",  seteq>;
-def BNE : DayB_I_2_Op<0b0001, "bne",  setne>;
-def BLT : DayB_I_2_Op<0b0010, "blt",  setlt>;
-def BGE : DayB_I_2_Op<0b0011, "bge",  setge>;
-def BLTU: DayB_I_2_Op<0b0100, "bltu", setult>;
-def BGEU: DayB_I_2_Op<0b0101, "bgeu", setuge>;
+// def LB: ALU_L<"lb", 0b0000>;
+// def LH: ALU_L<"lh", 0b0001>;
+// def LW: ALU_L<"lw", 0b0010>;
+// def LBU: ALU_L<"lbu", 0b0011>;
+// def LHU: ALU_L<"lhu", 0b0100>;
+// def LWU: ALU_L<"lwu", 0b0101>;
 
+// def SB: ALU_S<"sb", 0b0000>;
+// def SH: ALU_S<"sh", 0b0001>;
+// def SW: ALU_S<"sw", 0b0010>;
 
-class DayU_I_2_Op<
-    bits<4> opcode,
-    string mnemonic,
-    list<dag> patterns
->:DayInstU<opcode, Func4.func4_int, (mnemonic # " $rd, $imm32")>{
-    let Pattern = patterns;
-};
+// def BEQ: ALU_B<"beq", 0b0000>;
+// def BNE: ALU_B<"bne", 0b0001>;
+// def BLT: ALU_B<"blt", 0b0010>;
+// def BGE: ALU_B<"bge", 0b0011>;
+// def BLTU: ALU_B<"bltu", 0b0100>;
+// def BGEU: ALU_B<"bgeu", 0b0101>;
 
-def LUI : DayU_I_2_Op<0b0000, "lui", [(set GPR:$rd, (shl (i32 simm32:$imm32), 13))]>;
-def AUIPC : DayU_I_2_Op<0b0001, "auipc", [(set GPR:$rd, (add (get_pc), (shl (i32 simm32:$imm32), 13)))]>;
+// def LUI: ALU_U<"lui", 0b0000>;
+// def AUIPC: ALU_U<"auipc", 0b0001>;
 
-
-
-class DayJ_I_2_Op<
-    bits<4> opcode,
-    string mnemonic,
-    list<dag> patterns
->:DayInstJ<opcode, Func4.func4_int, (mnemonic # " $rd, $imm32")>{
-    let Pattern = patterns;
-};
-
-def JAL : DayJ_I_2_Op<0b0000, "jal", [(set GPR:$rd, (add (get_pc), 4)), (br bb_operand:$imm32)] >;// 不会写了
-
-
+// def JAL: ALU_J<"jal">;
 
 

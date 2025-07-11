@@ -6,7 +6,7 @@
 // 定义InstFormat,代表的是不同指令类型
 
 class InstFormat<bits<4> val>{
-    bits<4> Value =val;
+    bits<4> Value = val;
 }
 // 这里就是对不同的指令形式进行简单的编号，和指令码具体内容相关不是很大
 def InstFormatPseudo : InstFormat<0b0000>;
@@ -53,218 +53,227 @@ def DayTypeB      : DayTypeCode<"B",  0b0110>;
 def DayTypeU      : DayTypeCode<"U",  0b0111>;
 def DayTypeJ      : DayTypeCode<"J",  0b1000>;
 
-// 
-class DayInst<dag outs, dag ins, string asmstr, DayTypeCode daytype, InstFormat instrformat>:Instruction{
 
-    field bits<32> SoftFail = 0;
-    field bits<32> Inst;
-    field bits<4> InstrFormatValue = instrformat.Value;// 只是用于标记，并非是实际指令码指中的一部分
-
-    let Size = 4; // Assuming 32-bit instructions
+class DayInstCommon<dag outs, dag ins, string asmstr, string argstr, list<dag> pattern, InstFormat format>:
+    Instruction
+{
     let Namespace = "Day";
     dag OutOperandList = outs;
     dag InOperandList = ins;
-    let AsmString = asmstr;
-    let Pattern = [];
+    let AsmString = asmstr # !if(!empty(argstr),"","\t" # argstr);
+    let Pattern = pattern;
+    let isPseudo = 0; // 是否是伪指令
+    let isCommutable = 0;
+
+    let TSFlags{3-0} = format.Value; // 指令格式的类型字段码
+
+}
+
+class DayInst<  dag outs, dag ins, string asmstr, string argstr,
+                list<dag> pattern, InstFormat format>
+    : DayInstCommon<outs, ins, asmstr, argstr , 
+                    pattern, format>
+{
+    // 定义指令的操作码
+    field bits<32> Inst;
+    field bits<32> SoftFail = 0;
+    let Size = 4; // 其他位可以根据需要设置为0或其他值
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//// 定义R类型指令的格式
+//////////////////////////////////////////////////////////////////////////////////
+class DayInstRBase< bits<4> func4_val, bits<5> func5_val,
+                    dag outs, dag ins, 
+                    string asmstr, string argstr>:
+        DayInst<outs, ins, asmstr, argstr, [], InstFormatR>
+{
+    bits<5> rs2;
+    bits<5> rs1;
+    bits<5> rd;
+    bits<4> f4 = func4_val;
+    bits<5> f5 = func5_val;
+
+    let Inst{31-28} = f4; // func4_val
+    let Inst{27-23} = f5; // func5_val
+    let Inst{22-18} = rs2; // 第二个输入寄存器
+    let Inst{17-13} = rs1; // 第一个输入寄存器
+    let Inst{12-8}  = rd; // 输出寄存器
+    let Inst{3-0} = InstFormatR.Value; // R类型指令的类型字段码
+}
+
+class DayInstR_I<dag outs, dag ins, 
+                 string asmstr, string argstr,
+                 bits<4> opcode> : 
+        DayInstRBase< Func4.func4_int, Func5.val, outs, ins, asmstr, argstr> 
+{
+    let Inst{7-4} = opcode; // 操作码
+}
+
+class DayInstR_F<dag outs, dag ins, 
+                string asmstr, string argstr, 
+                bits<4> opcode> :
+        DayInstRBase< Func4.func4_float, Func5.val, outs, ins, asmstr, argstr> 
+{
+    let Inst{7-4} = opcode; // 操作码
 }
 
 
-// 定义R类型指令的格式
-class R_Form<bits<4> opcode, bits<4> func4_val, bits<5> func5_val>
-    : DayInst<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), "", DayTypeR, InstFormatR> {
-    // 定义R_Form特有的字段
-    field bits<4> func4 = func4_val;
-    field bits<5> func5 = func5_val;
-    field bits<5> rs2;
-    field bits<5> rs1;
-    field bits<5> rd;
-    field bits<4> Opcode = opcode; // R类型指令的操作码
+//////////////////////////////////////////////////////////////////////////////////
+//// 定义R4类型指令的格式
+//////////////////////////////////////////////////////////////////////////////////
 
-    // 这里的 Inst{} 赋值是核心，它定义了二进制指令的布局
-    let Inst{31-28} = func4;
-    let Inst{27-23} = func5;
-    let Inst{22-18} = rs2;
-    let Inst{17-13} = rs1;
-    let Inst{12-8}  = rd;
-    let Inst{7-4}   = Opcode;
-    // 在这里将 DayInstrType 映射到 Inst 的位上
-    let Inst{3-0}   = DayTypeR.Code; //
+class DayInstR4Base< bits<4> func4_val,
+                    dag outs, dag ins, 
+                    string asmstr, string argstr>:
+        DayInst<outs, ins, asmstr, argstr, [], InstFormatR4>
+{
+    bits<5> rs3; // 第三个输入寄存器
+    bits<5> rs2;
+    bits<5> rs1;
+    bits<5> rd;
+
+    let Inst{31-28} = func4_val; // func4_val
+    let Inst{27-23} = rs3; // func5_val
+    let Inst{22-18} = rs2; // 第二个输入寄存器
+    let Inst{17-13} = rs1; // 第一个输入寄存器
+    let Inst{12-8}  = rd; // 输出寄存器
+    let Inst{3-0} = InstFormatR4.Value; // R类型指令的类型字段码
 }
 
-// 定义R4类型指令的格式
-class R4_Form<bits<4> opcode, bits<4> func4_val>
-    : DayInst<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2, GPR:$rs3), "",DayTypeR4, InstFormatR4> {
-    // 定义R4_Form特有的字段
-    field bits<4> func4 = func4_val;
-    field bits<5> rs3;
-    field bits<5> rs2;
-    field bits<5> rs1;
-    field bits<5> rd;
-    field bits<4> Opcode = opcode; // R4类型指令的操作码
-    // 这里的 Inst{} 赋值是核心，它定义了二进制指令的布局
-    let Inst{31-28} = func4;
-    let Inst{27-23} = rs3;
-    let Inst{22-18} = rs2;
-    let Inst{17-13} = rs1;
-    let Inst{12-8}  = rd;
-    let Inst{7-4}   = Opcode;
-    // 在这里将 DayInstrType 映射到 Inst 的位上
-    let Inst{3-0}   = DayTypeR4.Code; // R4类型指令的类型字段码
+class DayInstR4_I<  dag outs, dag ins, 
+                    string asmstr, string argstr,
+                    bits<4> opcode> : 
+        DayInstR4Base< Func4.func4_int, outs, ins, asmstr, argstr> {
+    let Inst{7-4} = opcode; // 操作码
 }
 
-class I_Form<bits<4> opcode, bits<14> imm14_val>
-    : DayInst<(outs GPR:$rd), (ins GPR:$rs1), "", DayTypeI, InstFormatI> {
-    // 定义I_Form特有的字段
-    field bits<14> imm = imm14_val; // 立即数值
-    field bits<5> rs1;
-    field bits<5> rd;
-    field bits<4> Opcode = opcode; // I类型指令的操作码
+class DayInstR4_F<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+        DayInstR4Base< Func4.func4_float, outs, ins, asmstr, argstr> {
+    let Inst{7-4} = opcode; // 操作码
+}
 
-    // 这里的 Inst{} 赋值是核心，它定义了二进制指令的布局
-    let Inst{31-18} = imm;
-    let Inst{17-13} = rs1;
-    let Inst{12-8}  = rd;
-    let Inst{7-4}   = Opcode;
-    // 在这里将 DayInstrType 映射到 Inst 的位上
-    let Inst{3-0}   = DayTypeI.Code; // I类型指令的类型字段码
-};
+//////////////////////////////////////////////////////////////////////////////////
+//// 定义I类型指令的格式
+//////////////////////////////////////////////////////////////////////////////////
+class DayInstIBase<dag outs, dag ins, string asmstr, string argstr>: 
+    DayInst<outs, ins, asmstr, argstr, [], InstFormatI>
+{
+    bits<14> im14; // 立即数值
+    bits<5> rs1; // 第一个输入寄存器
+    bits<5> rd; // 输出寄存器
 
-class L_Form<bits<4> opcode, bits<14> imm14_val>
-    : DayInst<(outs GPR:$rd), (ins GPR:$rs1), "",DayTypeL, InstFormatL> {
-    // 定义L_Form特有的字段
-    field bits<14> imm = imm14_val{13-0}; // 立即数值
-    field bits<5> rs1;
-    field bits<5> rd;
-    field bits<4> Opcode = opcode; // L类型指令的操作码
-
-    // 这里的 Inst{} 赋值是核心，它定义了二进制指令的布局
-    let Inst{31-18} = imm;
-    let Inst{17-13} = rs1;
-    let Inst{12-8}  = rd;
-    let Inst{7-4}   = Opcode;
-    // 在这里将 DayInstrType 映射到 Inst 的位上
-    let Inst{3-0}   = DayTypeL.Code; // L类型指令的类型字段码
-};
-
-//
-class S_Form<bits<4> opcode, bits<14> imm14_val>
-    : DayInst<(outs), (ins GPR:$rs1, GPR:$rs2), "",DayTypeS, InstFormatS> {
-    // 定义S_Form特有的字段
-    field bits<14> imm = imm14_val{13-0}; // 立即数值
-    field bits<5> rs1;
-    field bits<5> rs2;
-    field bits<4> Opcode = opcode; // S类型指令的操作码
-
-    // 这里的 Inst{} 赋值是核心，它定义了二进制指令的布局
-    let Inst{31-18} = imm;
-    let Inst{17-13} = rs1;
-    let Inst{12-8}  = rs2;
-    let Inst{7-4}   = Opcode;
-    // 在这里将 DayInstrType 映射到 Inst 的位上
-    let Inst{3-0}   = DayTypeS.Code; // S类型指令的类型字段码
-};
-
-class B_Form<bits<4> opcode, bits<16> imm16_val>
-    : DayInst<(outs), (ins GPR:$rs1, GPR:$rs2), "", DayTypeB, InstFormatB> {
-    // 定义B_Form特有的字段
-    field bits<14> imm = imm16_val{15-2}; // 立即数值
-    field bits<5> rs1;
-    field bits<5> rs2;
-    field bits<4> Opcode = opcode; // B类型指令的操作码
-
-    // 这里的 Inst{} 赋值是核心，它定义了二进制指令的布局
-    let Inst{31-18} = imm;
-    let Inst{17-13} = rs1;
-    let Inst{12-8}  = rs2;
-    let Inst{7-4}   = Opcode;
-    // 在这里将 DayInstrType 映射到 Inst 的位上
-    let Inst{3-0}   = DayTypeB.Code; // B类型指令的类型字段码
-};
+    let Inst{31-18} = im14; // 立即数值
+    let Inst{17-13} = rs1; // 第一个输入寄存器
+    let Inst{12-8}  = rd; // 输出寄存器
+    let Inst{3-0} = InstFormatI.Value; // I类型指令的类型字段码
+}
 
 
-class U_Form<bits<4> opcode, bits<32> imm32_val>
-    : DayInst<(outs GPR:$rd), (), "", DayTypeU, InstFormatU> {
-    // 定义U_Form特有的字段
-    field bits<18> imm = imm32_val{31-14}; // 立即数值
-    field bits<5> rd;
-    field bits<4> Opcode = opcode; // U类型指令的操作码
+class DayInstI<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+    DayInstIBase<outs, ins, asmstr, argstr> {
 
-    // 这里的 Inst{} 赋值是核心，它定义了二进制指令的布局
-    let Inst{31} = 0b0;// U类型指令的最高位通常为0
-    let Inst{30-13} = imm;
-    let Inst{12-8}  = rd;
-    let Inst{7-4}   = Opcode;
-    // 在这里将 DayInstrType 映射到 Inst 的位上
-    let Inst{3-0}   = DayTypeU.Code; // U类型指令的类型字段码
-};
+    let Inst{7-4} = opcode; // 操作码
+}
 
+//////////////////////////////////////////////////////////////////////////////////////
+//// 定义L类型指令的格式
+//////////////////////////////////////////////////////////////////////////////////////
+class DayInstLBase<dag outs, dag ins, string asmstr, string argstr>: 
+    DayInst<outs, ins, asmstr, argstr, [], InstFormatL>
+{
+    bits<14> im14; // 立即数值
+    bits<5> rs1; // 第一个输入寄存器
+    bits<5> rd; // 输出寄存器
 
-class J_Form<bits<4> opcode, bits<32> imm32_val>
-    : DayInst<(outs GPR:$rd), (), "", DayTypeJ, InstFormatJ> {
-    // 定义J_Form特有的字段
-    field bits<25> imm = imm32_val{25-0}; // 立即数值
-    field bits<5> rd;
-    field bits<4> Opcode = opcode; // J类型指令的操作码
-
-    // 这里的 Inst{} 赋值是核心，它定义了二进制指令的布局
-    let Inst{31-13} = imm{24-6};
-    let Inst{12-8}  = rd;
-    let Inst{7-4}   = imm{5-2};
-    // 在这里将 DayInstrType 映射到 Inst 的位上
-    let Inst{3-0}   = DayTypeJ.Code; // J类型指令的类型字段码
-};
+    let Inst{31-18} = im14; // 立即数值
+    let Inst{17-13} = rs1; // 第一个输入寄存器
+    let Inst{12-8}  = rd; // 输出寄存器
+    let Inst{3-0} = InstFormatL.Value; // L类型指令的类型字段码
+}
 
 
-class DayInstR<bits<4> opcode, bits<4> func4_val, string asmstr> : \
-    R_Form<opcode, func4_val, Func5.val>{
-    let AsmString = asmstr;
-};
+class DayInstL<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+    DayInstLBase<outs, ins, asmstr, argstr> {
+    let Inst{7-4} = opcode; // 操作码
+}
 
-class DayInstR4<bits<4> opcode, bits<4> func4_val, string asmstr> : \
-    R4_Form<opcode, func4_val>{
-    let AsmString = asmstr;
-    let Pattern = [];
-};
+//////////////////////////////////////////////////////////////////////////////////////
+//// 定义S类型指令的格式
+//////////////////////////////////////////////////////////////////////////////////////
+class DayInstSBase<dag outs, dag ins, string asmstr, string argstr>: 
+    DayInst<outs, ins, asmstr, argstr, [], InstFormatS>
+{
+    bits<14> im14; // 立即数值
+    bits<5> rs1; // 第一个输入寄存器
+    bits<5> rs2; // 第二个输入寄存器
+    // S类型指令通常没有输出寄存器
+    let Inst{31-18} = im14; // 立即数值
+    let Inst{17-13} = rs1; // 第一个输入寄存器
+    let Inst{12-8}  = rs2; // 第二个输入寄存器
+    let Inst{3-0} = InstFormatS.Value; // S类型指令的类型字段码
+}
 
-class DayInstI<bits<4> opcode, bits<14> imm14_val, string asmstr>
-    : I_Form<opcode, imm14_val>{
-    let AsmString = asmstr;
-};
+class DayInstS<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+    DayInstSBase<outs, ins, asmstr, argstr> {
+    let Inst{7-4} = opcode; // 操作码
+}
 
-class DayInstL<bits<4> opcode, bits<14> imm14_val, string asmstr>
-    : L_Form<opcode, imm14_val>{
-    let AsmString = asmstr;
-    let Defs = [GPR:$rd];
-    let Uses = [GPR:$rs1];
-};
+//////////////////////////////////////////////////////////////////////////////////////
+//// 定义B类型指令的格式
+//////////////////////////////////////////////////////////////////////////////////////
+class DayInstBBase<dag outs, dag ins, string asmstr, string argstr>: 
+    DayInst<outs, ins, asmstr, argstr, [], InstFormatB>
+{
+    bits<16> im16; // 立即数值
+    bits<5> rs1; // 第一个输入寄存器
+    bits<5> rs2; // 第二个输入寄存器
+    // B类型指令通常没有输出寄存器
+    let Inst{31-18} = im16{15-2}; // 立即数值
+    let Inst{17-13} = rs1; // 第一个输入寄存器
+    let Inst{12-8}  = rs2; // 第二个输入寄存器
+    let Inst{3-0} = InstFormatB.Value; // B类型指令的类型字段码
+}
 
-class DayInstS<bits<4> opcode, bits<14> imm14_val, string asmstr>
-    : S_Form<opcode, imm14_val>{
-    let AsmString = asmstr;
-    let Defs = [];
-    let Uses = [GPR:$rs1, GPR:$rs2];
-};
+class DayInstB<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+    DayInstBBase<outs, ins, asmstr, argstr> {
+    let Inst{7-4} = opcode; // 操作码
+}
 
-class DayInstB<bits<4> opcode, bits<16> imm16_val, string asmstr>
-    : B_Form<opcode, imm16_val>{
-    let AsmString = asmstr;
-    let Defs = []; // 分支指令通常没有输出寄存器
-    let Uses = [GPR:$rs1, GPR:$rs2]; // 比较操作数
-};
+//////////////////////////////////////////////////////////////////////////////////////
+//// 定义U类型指令的格式
+//////////////////////////////////////////////////////////////////////////////////////
+class DayInstUBase<dag outs, dag ins, string asmstr, string argstr>: 
+    DayInst<outs, ins, asmstr, argstr, [], InstFormatU>
+{
+    bits<32> im32; // 立即数值
+    bits<5> rd; // 输出寄存器
 
-class DayInstU<bits<4> opcode, bits<32> imm32_val, string asmstr>
-    : U_Form<opcode, imm32_val>{
-    let AsmString = asmstr;
-};
+    let Inst{31} = 0b0;
+    let Inst{30-13} = im32{31-14}; // 立即数值
+    let Inst{12-8}  = rd; // 输出寄存器
+    let Inst{3-0} = InstFormatU.Value; // U类型指令的类型字段码
+}
 
-class DayInstJ<bits<4> opcode, bits<32> imm32_val, string asmstr>
-    : J_Form<opcode, imm32_val>{
-    let AsmString = asmstr;
-};
+class DayInstU<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+    DayInstUBase<outs, ins, asmstr, argstr> {
+    let Inst{7-4} = opcode; // 操作码
+}
 
+//////////////////////////////////////////////////////////////////////////////////////
+//// 定义J类型指令的格式
+//////////////////////////////////////////////////////////////////////////////////////
+class DayInstJBase<dag outs, dag ins, string asmstr, string argstr>: 
+    DayInst<outs, ins, asmstr, argstr, [], InstFormatJ>
+{
+    bits<32> im32; // 立即数值
+    bits<5> rd; // 输出寄存器
 
+    let Inst{31-13} = im32{24-6};
+    let Inst{12-8}  = rd; // 输出寄存器
+    let Inst{7-4} = im32{5-2}; // 立即数值的低4位
+    let Inst{3-0} = InstFormatJ.Value; // J类型指令的类型字段码
+}
 
-
-
-
-
+class DayInstJ<dag outs, dag ins, string asmstr, string argstr> : 
+    DayInstJBase<outs, ins, asmstr, argstr>;

@@ -1,0 +1,5 @@
+#ifndef DAYREGISTERINFO_H_
+#define DAYREGISTERINFO_H_
+
+
+#endif

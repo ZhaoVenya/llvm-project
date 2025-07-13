@@ -12,16 +12,14 @@ include "DayInstrFormats.td"
 class ALU_RR_I<string asmstr, bits<4> opcode, SDNode OpNode> : 
         DayInstR_I<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), 
         asmstr, "$rd, $rs1, $rs2", 
-        opcode>
-{
+        opcode>{
     let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1, GPR:$rs2))];
 }
 
 class ALU_RR_I_PatFrag<string asmstr, bits<4> opcode, PatFrag OpNode> : 
         DayInstR_I<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), 
         asmstr, "$rd, $rs1, $rs2", 
-        opcode>
-{
+        opcode>{
     let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1, GPR:$rs2))];
 }
 
@@ -30,16 +28,14 @@ class ALU_RR_I_PatFrag<string asmstr, bits<4> opcode, PatFrag OpNode> :
 class ALU_RR_F<string asmstr, bits<4> opcode, SDNode OpNode> : 
         DayInstR_F<(outs FPR:$rd), (ins FPR:$rs1, FPR:$rs2), 
         asmstr, "$rd, $rs1, $rs2", 
-        opcode>
-{
+        opcode>{
     let Pattern = [(set FPR:$rd, (OpNode FPR:$rs1, FPR:$rs2))];
 }
 
 class ALU_RR_F_PatFrag<string asmstr, bits<4> opcode, PatFrag OpNode> : 
         DayInstR_F<(outs FPR:$rd), (ins FPR:$rs1, FPR:$rs2), 
         asmstr, "$rd, $rs1, $rs2", 
-        opcode>
-{
+        opcode>{
     let Pattern = [(set FPR:$rd, (OpNode FPR:$rs1, FPR:$rs2))];
 }
 
@@ -52,6 +48,19 @@ class ALU_RR_NOT<string asmstr, bits<4> opcode> :
   let Pattern = [(set GPR:$rd, (not GPR:$rs1))];
 }
 
+// 定义浮点"小于"比较的匹配模式
+def fsetolt : PatFrag<  (ops node:$lhs, node:$rhs), 
+                        (setolt node:$lhs, node:$rhs),
+                        [{return N->getOperand(0).getValueType().isFloatingPoint();}]>;
+
+class ALU_RR_RF_PatFrag<string asmstr, bits<4> opcode, PatFrag OpNode> : 
+        DayInstR_F<(outs GPR:$rd), (ins FPR:$rs1, FPR:$rs2), 
+        asmstr, "$rd, $rs1, $rs2", 
+        opcode>{
+    let Pattern = [(set GPR:$rd, (OpNode FPR:$rs1, FPR:$rs2))];
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////////
 //// R4指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
@@ -61,9 +70,10 @@ class ALU_R4_I<string asmstr, bits<4> opcode> :
         opcode>;
 
 class ALU_R4_F<string asmstr, bits<4> opcode> : 
-        DayInstR4_F<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2, GPR:$rs3), 
+        DayInstR4_F<(outs FPR:$rd), (ins FPR:$rs1, FPR:$rs2, FPR:$rs3), 
         asmstr, "$rd, $rs1, $rs2, $rs3", 
         opcode>;
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 //// I指令对应的Pattern
@@ -82,6 +92,7 @@ class ALU_L<string asmstr, bits<4> opcode> :
         asmstr, "$rd, $rs1", 
         opcode>;
 
+
 /////////////////////////////////////////////////////////////////////////////////////
 //// S指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
@@ -89,6 +100,7 @@ class ALU_S<string asmstr, bits<4> opcode> :
         DayInstS<(outs), (ins GPR:$rs1, GPR:$rs2), 
         asmstr, "$rs1, $rs2", 
         opcode>;
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 //// B指令对应的Pattern
@@ -115,6 +127,7 @@ class ALU_J<string asmstr> :
         DayInstJ<(outs GPR:$rd), (ins), 
         asmstr, "$rd">;
 
+
 //////////////////////////////////////////////////////////////////////////////////////
 
 def ADD : ALU_RR_I<"add", 0b0000, add>;
@@ -135,22 +148,21 @@ def ADDF: ALU_RR_F<"addf", 0b0000, fadd>;
 def SUBF: ALU_RR_F<"subf", 0b0001, fsub>;
 def MULF: ALU_RR_F<"mulf", 0b0010, fmul>;
 def DIVF: ALU_RR_F<"divf", 0b0011, fdiv>;
-
-def fsetolt : PatFrag<(ops node:$a, node:$b), (setolt node:$a, node:$b)>;
-def SLTF: ALU_RR_F_PatFrag<"sltf", 0b0100, fsetolt>;
+def SLTF : ALU_RR_RF_PatFrag<"sltf", 0b0100, fsetolt>;
 
 
-// def MPAP: ALU_R4_I<"mpap", 0b0011>;
-// def MPAN: ALU_R4_I<"mpan", 0b0100>;
-// def MNAP: ALU_R4_I<"mnap", 0b0101>;
-// def MNAN: ALU_R4_I<"mnan", 0b0110>;
-// def BITSW: ALU_R4_I<"bitsw", 0b0111>;
-// def BYTESW: ALU_R4_I<"bytesw", 0b1000>;
 
-// def MPAPF: ALU_R4_F<"mpapf", 0b0011>;
-// def MPANF: ALU_R4_F<"mpanf", 0b0100>;
-// def MNAPF: ALU_R4_F<"mnapf", 0b0101>;
-// def MNANF: ALU_R4_F<"mnanf", 0b0110>;
+def MPAP: ALU_R4_I<"mpap", 0b0011>;
+def MPAN: ALU_R4_I<"mpan", 0b0100>;
+def MNAP: ALU_R4_I<"mnap", 0b0101>;
+def MNAN: ALU_R4_I<"mnan", 0b0110>;
+def BITSW: ALU_R4_I<"bitsw", 0b0111>;
+def BYTESW: ALU_R4_I<"bytesw", 0b1000>;
+
+def MPAPF: ALU_R4_F<"mpapf", 0b0011>;
+def MPANF: ALU_R4_F<"mpanf", 0b0100>;
+def MNAPF: ALU_R4_F<"mnapf", 0b0101>;
+def MNANF: ALU_R4_F<"mnanf", 0b0110>;
 
 
 // def ADDI: ALU_I<"addi", 0b0000, add>;

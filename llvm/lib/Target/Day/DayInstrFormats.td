@@ -139,6 +139,13 @@ class DayInstR4Base< bits<4> func4_val,
     let Inst{17-13} = rs1; // 第一个输入寄存器
     let Inst{12-8}  = rd; // 输出寄存器
     let Inst{3-0} = InstFormatR4.Value; // R类型指令的类型字段码
+    
+    // 关键属性声明
+    let hasSideEffects = 0;
+    let mayLoad = 0;
+    let mayStore = 0;
+    let isCodeGenOnly = 1;
+    let Pattern = [];
 }
 
 class DayInstR4_I<  dag outs, dag ins, 

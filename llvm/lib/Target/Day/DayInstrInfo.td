@@ -78,10 +78,21 @@ class ALU_R4_F<string asmstr, bits<4> opcode> :
 /////////////////////////////////////////////////////////////////////////////////////
 //// I指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
-class ALU_I<string asmstr, bits<4> opcode> : 
-        DayInstI<(outs GPR:$rd), (ins GPR:$rs1), 
-        asmstr, "$rd, $rs1", 
-        opcode>;
+def simm14 : Operand<i32>, ImmLeaf<i32, [{ return isInt<14>(Imm);}]>;
+
+class ALU_I<string asmstr, bits<4> opcode, SDNode OpNode> : 
+        DayInstI<(outs GPR:$rd), (ins GPR:$rs1, simm14:$imm14), 
+        asmstr, "$rd, $rs1, $imm14", 
+        opcode>{
+        let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1, simm14:$imm14))];
+}
+
+class ALU_I_I_PatFrag<string asmstr, bits<4> opcode, PatFrag OpNode> : 
+        DayInstR_I<(outs GPR:$rd), (ins GPR:$rs1, simm14:$imm14), 
+        asmstr, "$rd, $rs1, $imm14", 
+        opcode>{
+    let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1, simm14:$imm14))];
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -165,19 +176,17 @@ def MNAPF: ALU_R4_F<"mnapf", 0b0101>;
 def MNANF: ALU_R4_F<"mnanf", 0b0110>;
 
 
-// def ADDI: ALU_I<"addi", 0b0000, add>;
-// def SUBI: ALU_I<"subi", 0b0001, sub>;
-// def MULI: ALU_I<"muli", 0b0010, mul>;
-// def DIVI: ALU_I<"divi", 0b0011, divs>;
-// def SLTI: ALU_I<"slti", 0b0100>;
-// def SLTIU: ALU_I<"sltiu", 0b0101>;
-// def ANDI: ALU_I<"andi", 0b0110, and>;
-// def ORI : ALU_I<"ori",  0b0111, or>;
-// def XORI: ALU_I<"xori", 0b1000, xor>;
-// def JALR: ALU_I<"jalr", 0b1010>;
+def ADDI: ALU_I<"addi", 0b0000, add>;
+def SUBI: ALU_I<"subi", 0b0001, sub>;
+def MULI: ALU_I<"muli", 0b0010, mul>;
+def DIVI: ALU_I<"divi", 0b0011, sdiv>;
+def SLTI: ALU_I_I_PatFrag<"slti", 0b0100, setlt>;
+def SLTIU: ALU_I_I_PatFrag<"sltiu", 0b0101, setult>;
+def ANDI: ALU_I<"andi", 0b0110, and>;
+def ORI : ALU_I<"ori",  0b0111, or>;
+def XORI: ALU_I<"xori", 0b1000, xor>;
 
-
-
+def JALR : ALU_I<"jalr", 0b1010, add>;
 
 // def LB: ALU_L<"lb", 0b0000>;
 // def LH: ALU_L<"lh", 0b0001>;

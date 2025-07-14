@@ -98,10 +98,22 @@ class ALU_I_I_PatFrag<string asmstr, bits<4> opcode, PatFrag OpNode> :
 /////////////////////////////////////////////////////////////////////////////////////
 //// L指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
-class ALU_L<string asmstr, bits<4> opcode> : 
-        DayInstL<(outs GPR:$rd), (ins GPR:$rs1), 
-        asmstr, "$rd, $rs1", 
-        opcode>;
+// 定义 M_LOAD SDNode
+// SDNode 表示 SelectionDAG 中的一个节点，用于描述特定操作。
+def LoadTypeProfile : SDTypeProfile<1, 1, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>;
+
+def M_LOAD : SDNode<
+        "M_LOAD",
+        LoadTypeProfile,
+        [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
+        SDNPMayLoad,SDNPMemOperand]>;
+
+class ALU_L<string asmstr, bits<4> opcode, PatFrag OpNode> : 
+        DayInstL<(outs GPR:$rd), (ins GPR:$rs1, simm14:$imm14), 
+        asmstr, "$rd, $rs1($imm14)", 
+        opcode>{
+    let Pattern = [(set GPR:$rd, (OpNode (M_LOAD (add GPR:$rs1, simm14:$imm14))))];
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -186,14 +198,14 @@ def ANDI: ALU_I<"andi", 0b0110, and>;
 def ORI : ALU_I<"ori",  0b0111, or>;
 def XORI: ALU_I<"xori", 0b1000, xor>;
 
-def JALR : ALU_I<"jalr", 0b1010, add>;
+def JALR : ALU_I<"jalr", 0b1010, add>;// 这个地方还是存在问题
 
-// def LB: ALU_L<"lb", 0b0000>;
-// def LH: ALU_L<"lh", 0b0001>;
-// def LW: ALU_L<"lw", 0b0010>;
-// def LBU: ALU_L<"lbu", 0b0011>;
-// def LHU: ALU_L<"lhu", 0b0100>;
-// def LWU: ALU_L<"lwu", 0b0101>;
+def LB: ALU_L<"lb", 0b0000, sextloadi8 >;
+def LH: ALU_L<"lh", 0b0001, sextloadi16>;
+def LW: ALU_L<"lw", 0b0010, sextloadi32>;
+def LBU: ALU_L<"lbu", 0b0011, extloadi8>;
+def LHU: ALU_L<"lhu", 0b0100, extloadi16>;
+def LWU: ALU_L<"lwu", 0b0101, extloadi32>;
 
 // def SB: ALU_S<"sb", 0b0000>;
 // def SH: ALU_S<"sh", 0b0001>;

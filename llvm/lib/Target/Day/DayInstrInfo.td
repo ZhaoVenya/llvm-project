@@ -119,10 +119,22 @@ class ALU_L<string asmstr, bits<4> opcode, PatFrag OpNode> :
 /////////////////////////////////////////////////////////////////////////////////////
 //// S指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
-class ALU_S<string asmstr, bits<4> opcode> : 
-        DayInstS<(outs), (ins GPR:$rs1, GPR:$rs2), 
-        asmstr, "$rs1, $rs2", 
-        opcode>;
+
+def StoreTypeProfile : SDTypeProfile<0, 2, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>;
+
+def M_STORE : SDNode<
+        "M_STORE",
+        StoreTypeProfile,
+        [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
+        SDNPMayStore,SDNPMemOperand]>;
+
+
+class ALU_S<string asmstr, bits<4> opcode, PatFrag OpNode> : 
+        DayInstS<(outs), (ins GPR:$rs1, GPR:$rs2, simm14:$imm14), 
+        asmstr, "$rs1, $rs2($imm14)",
+        opcode>{
+    let Pattern = [(OpNode GPR:$rs1, (add GPR:$rs2, simm14:$imm14))];
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -207,9 +219,9 @@ def LBU: ALU_L<"lbu", 0b0011, extloadi8>;
 def LHU: ALU_L<"lhu", 0b0100, extloadi16>;
 def LWU: ALU_L<"lwu", 0b0101, extloadi32>;
 
-// def SB: ALU_S<"sb", 0b0000>;
-// def SH: ALU_S<"sh", 0b0001>;
-// def SW: ALU_S<"sw", 0b0010>;
+def SB: ALU_S<"sb", 0b0000, truncstorei8>;
+def SH: ALU_S<"sh", 0b0001, truncstorei16>;
+def SW: ALU_S<"sw", 0b0010, truncstorei32>;
 
 // def BEQ: ALU_B<"beq", 0b0000>;
 // def BNE: ALU_B<"bne", 0b0001>;

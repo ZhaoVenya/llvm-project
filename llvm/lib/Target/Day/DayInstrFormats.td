@@ -245,6 +245,7 @@ class DayInstBBase<dag outs, dag ins, string asmstr, string argstr>:
 class DayInstB<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
     DayInstBBase<outs, ins, asmstr, argstr> {
     let Inst{7-4} = opcode; // 操作码
+    let Constraints = "";  // 关键：无操作数绑定
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

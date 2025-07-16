@@ -5,7 +5,7 @@
 
 include "DayInstrFormats.td"
 
-def Day_PC : SDNode<"Day_PC", SDTNone, [SDNPOutGlue, SDNPInGlue, SDNPHasChain]>;
+def simm32 : Operand<i32>, ImmLeaf<i32, [{ return isInt<32>(Imm);}]>;
 
 /////////////////////////////////////////////////////////////////////////////////////
 //// R指令对应的Pattern
@@ -156,7 +156,11 @@ def Imm16AsmOperand : AsmOperandClass {
 //   let DecoderMethod = "decodeSimm16";
 // }
 
-def brtarget : Operand<OtherVT>;
+def brtarget : Operand<OtherVT>{
+  let PrintMethod = "printBranchOperand";
+  let DecoderMethod = "decodeSimm32Operand";
+  let MIOperandInfo = (ops simm32);  // 声明底层类型为 simm32
+}
 
 class ALU_B<string asmstr, bits<4> opcode> : 
         DayInstB<(outs), (ins GPR:$rs1, GPR:$rs2, brtarget:$im16), 
@@ -170,7 +174,7 @@ class ALU_B<string asmstr, bits<4> opcode> :
 //// U指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
 
-def simm32 : Operand<i32>, ImmLeaf<i32, [{ return isInt<32>(Imm);}]>;
+
 
 class ALU_U<string asmstr, bits<4> opcode> : 
         DayInstU<(outs GPR:$rd), (ins simm32:$im32), 
@@ -181,7 +185,7 @@ class ALU_U<string asmstr, bits<4> opcode> :
 //// J指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
 class ALU_J<string asmstr> : 
-        DayInstJ<(outs GPR:$rd), (ins simm32:$im32), 
+        DayInstJ<(outs GPR:$rd), (ins brtarget:$im32), 
         asmstr, "$rd, $im32">;
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -229,6 +233,34 @@ def ORI : ALU_I<"ori",  0b0111, or>;
 def XORI: ALU_I<"xor", 0b1000, xor>;
 def JALR : ALU_I_JALR<"jalr", 0b1010>; // 这个地方需要定义Pat
 
+
+
+def retglue : SDNode<"DayISD::RET_GLUE", SDTNone, 
+        [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+
+let isBarrier = 1, isReturn = 1, isTerminator = 1, mayLoad = 0, mayStore = 0, hasSideEffects = 1 in {
+  def PseudoRET : DayInstPseudo<
+              (outs),
+              (ins),
+              [(retglue)]>,
+              PseudoInstExpansion<(JALR ZERO, RA, 0)>;
+}
+
+def : InstAlias<"ret", (JALR ZERO, RA, 0)>;
+
+def DaySDT_Call : SDTypeProfile<0, -1, [SDTCisVT<0, iPTR>]>;
+
+def day_call  : SDNode<"DayISD::Call", DaySDT_Call,
+                            [SDNPHasChain, SDNPOutGlue,
+                             SDNPOptInGlue, SDNPVariadic]>;
+def CALL : DayInstPseudo<(outs), (ins GPR:$rs1), [(day_call GPR:$rs1)]>, PseudoInstExpansion<(JALR RA, GPR:$rs1, 0)> {
+    let isCall = 1;
+    let hasSideEffects = 1;
+    let mayLoad = 0;
+    let mayStore = 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 def LB: ALU_L<"lb", 0b0000, sextloadi8 >;
 def LH: ALU_L<"lh", 0b0001, sextloadi16>;
 def LW: ALU_L<"lw", 0b0010, sextloadi32>;
@@ -263,13 +295,15 @@ def AUIPC: ALU_U<"auipc", 0b0001>{
     let mayStore = 0;
     let hasSideEffects = 1;
 }
-
-/////////////////
+/////////////////////////////////////////////
 
 
 def JAL: ALU_J<"jal">{
     let hasSideEffects = 1;
     let mayStore = 0;
     let mayLoad = 0;
+    let rd = 0;
 }
+
+def : Pat<(br bb:$dst), (JAL bb:$dst)>;
 

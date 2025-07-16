@@ -258,7 +258,7 @@ class DayInstUBase<dag outs, dag ins, string asmstr, string argstr>:
     bits<5> rd; // 输出寄存器
 
     let Inst{31} = 0b0;
-    let Inst{30-13} = im32{31-14}; // 立即数值
+    let Inst{30-13} = im32{17-0}; // 立即数值
     let Inst{12-8}  = rd; // 输出寄存器
     let Inst{3-0} = InstFormatU.Value; // U类型指令的类型字段码
 }
@@ -285,3 +285,32 @@ class DayInstJBase<dag outs, dag ins, string asmstr, string argstr>:
 
 class DayInstJ<dag outs, dag ins, string asmstr, string argstr> : 
     DayInstJBase<outs, ins, asmstr, argstr>;
+
+/////////////////////////////////////////////////////////////////////////////////
+// 伪指令
+class DayInstPseudoBase<dag outs, dag ins, string asmstr, string argstr> 
+    : DayInst<outs, ins, asmstr, argstr, [], InstFormatPseudo>
+{
+    bits<32> im32; // 立即数值
+    bits<5> rd; // 输出寄存器
+
+    let Inst{31} = 0b0;
+    let Inst{30-13} = im32{17-0}; // 立即数值
+    let Inst{12-8}  = rd; // 输出寄存器
+    let Inst{3-0} = InstFormatPseudo.Value; // U类型指令的类型字段码
+
+    let isPseudo = 1;
+}
+
+// class DayInstU<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+//     DayInstUBase<outs, ins, asmstr, argstr> {
+//     let Inst{7-4} = opcode; // 操作码
+// }
+
+
+class DayInstPseudo<dag outs, dag ins, list<dag> pattern, string asmstr = "">
+    : DayInstPseudoBase<outs, ins, asmstr, ""> {
+
+    let Pattern = pattern;
+    let isCodeGenOnly = 1;
+}

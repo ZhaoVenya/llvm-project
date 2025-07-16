@@ -173,7 +173,7 @@ class ALU_B<string asmstr, bits<4> opcode> :
 def simm32 : Operand<i32>, ImmLeaf<i32, [{ return isInt<32>(Imm);}]>;
 
 class ALU_U<string asmstr, bits<4> opcode> : 
-        DayInstU<(outs GPR:$rd), (ins), 
+        DayInstU<(outs GPR:$rd), (ins simm32:$im32), 
         asmstr, "$rd, $im32",
         opcode>;
 
@@ -181,8 +181,8 @@ class ALU_U<string asmstr, bits<4> opcode> :
 //// J指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
 class ALU_J<string asmstr> : 
-        DayInstJ<(outs GPR:$rd), (ins), 
-        asmstr, "$rd">;
+        DayInstJ<(outs GPR:$rd), (ins simm32:$im32), 
+        asmstr, "$rd, $im32">;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -227,7 +227,7 @@ def SLTIU: ALU_I_I_PatFrag<"sltiu", 0b0101, setult>;
 def ANDI: ALU_I<"andi", 0b0110, and>;
 def ORI : ALU_I<"ori",  0b0111, or>;
 def XORI: ALU_I<"xor", 0b1000, xor>;
-def JALR : ALU_I_JALR<"jalr", 0b1010>;
+def JALR : ALU_I_JALR<"jalr", 0b1010>; // 这个地方需要定义Pat
 
 def LB: ALU_L<"lb", 0b0000, sextloadi8 >;
 def LH: ALU_L<"lh", 0b0001, sextloadi16>;
@@ -253,6 +253,23 @@ def : Pat<(brcond (i32 (setge  GPR:$rs1, GPR:$rs2)), bb:$dst), (BGE GPR:$rs1,  G
 def : Pat<(brcond (i32 (setult GPR:$rs1, GPR:$rs2)), bb:$dst), (BLTU GPR:$rs1, GPR:$rs2,  brtarget:$dst)>;
 def : Pat<(brcond (i32 (setuge GPR:$rs1, GPR:$rs2)), bb:$dst), (BGEU GPR:$rs1, GPR:$rs2,  brtarget:$dst)>;
 
+def LUI: ALU_U<"lui", 0b0000>{
+    let mayLoad = 1;
+    let mayStore = 0;
+    let hasSideEffects = 0;
+}
+def AUIPC: ALU_U<"auipc", 0b0001>{
+    let mayLoad = 1;
+    let mayStore = 0;
+    let hasSideEffects = 1;
+}
+
+/////////////////
 
 
-// def : Pat<(br simm16_br:$dst), (JAL ZERO, simm16_br:$dst)>;
+def JAL: ALU_J<"jal">{
+    let hasSideEffects = 1;
+    let mayStore = 0;
+    let mayLoad = 0;
+}
+

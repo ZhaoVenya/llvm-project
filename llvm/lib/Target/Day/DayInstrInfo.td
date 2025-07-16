@@ -75,6 +75,7 @@ class ALU_R4_F<string asmstr, bits<4> opcode> :
 //// I指令对应的Pattern
 /////////////////////////////////////////////////////////////////////////////////////
 def simm14 : Operand<i32>, ImmLeaf<i32, [{ return isInt<14>(Imm);}]>;
+def simm14j: Operand<i32>;
 
 class ALU_I<string asmstr, bits<4> opcode, SDNode OpNode> : 
         DayInstI<(outs GPR:$rd), (ins GPR:$rs1, simm14:$im14), 
@@ -90,11 +91,16 @@ class ALU_I_I_PatFrag<string asmstr, bits<4> opcode, PatFrag OpNode> :
     let Pattern = [(set GPR:$rd, (OpNode GPR:$rs1, simm14:$im14))];
 }
 
+
 class ALU_I_JALR<string asmstr, bits<4> opcode> : 
-        DayInstI<(outs GPR:$rd), (ins GPR:$rs1, simm14:$im14_dummy), 
-        asmstr, "$rd, $rs1, 0", 
+        DayInstI<(outs GPR:$rd), (ins GPR:$rs1, simm14j:$im14), 
+        asmstr, "$rd, $rs1, $im14", 
         opcode>{
-    let Inst{21-8} = 0; 
+    let hasSideEffects = 1;
+    let mayLoad = 0;
+    let mayStore = 0;
+    let Inst{21-8} = 0;
+    let Pattern = [];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -143,20 +149,21 @@ def Imm16AsmOperand : AsmOperandClass {
   let ParserMethod = "parseImm16";
 }
 
-def simm16_br : Operand<i32> {
-  let ParserMatchClass = Imm16AsmOperand;
-  let EncoderMethod = "getBranch16TargetOpValue";
-  let OperandType = "OPERAND_PCREL";
-  let DecoderMethod = "decodeSimm16";
-}
+// def simm16_br : Operand<i32> {
+//   let ParserMatchClass = Imm16AsmOperand;
+//   let EncoderMethod = "getBranch16TargetOpValue";
+//   let OperandType = "OPERAND_PCREL";
+//   let DecoderMethod = "decodeSimm16";
+// }
+
+def brtarget : Operand<OtherVT>;
 
 class ALU_B<string asmstr, bits<4> opcode> : 
-        DayInstB<(outs), (ins GPR:$rs1, GPR:$rs2, simm16_br:$im16), 
+        DayInstB<(outs), (ins GPR:$rs1, GPR:$rs2, brtarget:$im16), 
         asmstr, "$rs1, $rs2, $im16", 
         opcode> {
     let isTerminator = 1;
-    let isBranch = 1;
-    let isBarrier = 1;
+    let Pattern = [];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +227,7 @@ def SLTIU: ALU_I_I_PatFrag<"sltiu", 0b0101, setult>;
 def ANDI: ALU_I<"andi", 0b0110, and>;
 def ORI : ALU_I<"ori",  0b0111, or>;
 def XORI: ALU_I<"xor", 0b1000, xor>;
-// def JALR : ALU_I_JALR<"jalr", 0b1010>;
+def JALR : ALU_I_JALR<"jalr", 0b1010>;
 
 def LB: ALU_L<"lb", 0b0000, sextloadi8 >;
 def LH: ALU_L<"lh", 0b0001, sextloadi16>;
@@ -233,22 +240,19 @@ def SB: ALU_S<"sb", 0b0000, truncstorei8>;
 def SH: ALU_S<"sh", 0b0001, truncstorei16>;
 def SW: ALU_S<"sw", 0b0010, truncstorei32>;
 
-// def BEQ: ALU_B<"beq",   0b0000>;
-// def BNE: ALU_B<"bne",   0b0001>;
-// def BLT: ALU_B<"blt",   0b0010>;
-// def BGE: ALU_B<"bge",   0b0011>;
-// def BLTU: ALU_B<"bltu", 0b0100>;
-// def BGEU: ALU_B<"bgeu", 0b0101>;
+def BEQ: ALU_B<"beq",   0b0000>;
+def BNE: ALU_B<"bne",   0b0001>;
+def BLT: ALU_B<"blt",   0b0010>;
+def BGE: ALU_B<"bge",   0b0011>;
+def BLTU: ALU_B<"bltu", 0b0100>;
+def BGEU: ALU_B<"bgeu", 0b0101>;
+def : Pat<(brcond (i32 (seteq  GPR:$rs1, GPR:$rs2)), bb:$dst), (BEQ GPR:$rs1,  GPR:$rs2,  brtarget:$dst)>;
+def : Pat<(brcond (i32 (setne  GPR:$rs1, GPR:$rs2)), bb:$dst), (BNE GPR:$rs1,  GPR:$rs2,  brtarget:$dst)>;
+def : Pat<(brcond (i32 (setlt  GPR:$rs1, GPR:$rs2)), bb:$dst), (BLT GPR:$rs1,  GPR:$rs2,  brtarget:$dst)>;
+def : Pat<(brcond (i32 (setge  GPR:$rs1, GPR:$rs2)), bb:$dst), (BGE GPR:$rs1,  GPR:$rs2,  brtarget:$dst)>;
+def : Pat<(brcond (i32 (setult GPR:$rs1, GPR:$rs2)), bb:$dst), (BLTU GPR:$rs1, GPR:$rs2,  brtarget:$dst)>;
+def : Pat<(brcond (i32 (setuge GPR:$rs1, GPR:$rs2)), bb:$dst), (BGEU GPR:$rs1, GPR:$rs2,  brtarget:$dst)>;
 
-// def JAL: ALU_J<"jal">;
 
-// def : Pat<(seq (set GPR:$rd, (add (Day_PC), 4)), (brind (i32 node:$rs_val)))>, (JALR GPR:$rd, GPR:$rs_val, 0);
-
-// def : Pat<(brcond (zext (seteq GPR:$rs1, GPR:$rs2)), simm16_br:$dst), (BEQ GPR:$rs1, GPR:$rs2, simm16_br:$dst)>;
-// def : Pat<(brcond (zext (setne GPR:$rs1, GPR:$rs2)), simm16_br:$dst), (BNE GPR:$rs1, GPR:$rs2, simm16_br:$dst)>;
-// def : Pat<(brcond (zext (setlt GPR:$rs1, GPR:$rs2)), simm16_br:$dst), (BLT GPR:$rs1, GPR:$rs2, simm16_br:$dst)>;
-// def : Pat<(brcond (zext (setge GPR:$rs1, GPR:$rs2)), simm16_br:$dst), (BGE GPR:$rs1, GPR:$rs2, simm16_br:$dst)>;
-// def : Pat<(brcond (zext (setult GPR:$rs1, GPR:$rs2)), simm16_br:$dst), (BLTU GPR:$rs1, GPR:$rs2, simm16_br:$dst)>;
-// def : Pat<(brcond (zext (setuge GPR:$rs1, GPR:$rs2)), simm16_br:$dst), (BGEU GPR:$rs1, GPR:$rs2, simm16_br:$dst)>;
 
 // def : Pat<(br simm16_br:$dst), (JAL ZERO, simm16_br:$dst)>;

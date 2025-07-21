@@ -73,3 +73,8 @@ pythonenv*
 /clang/utils/analyzer/projects/*/RefScanBuildResults
 # automodapi puts generated documentation files here.
 /lldb/docs/python_api/
+
+day_test_doc/build
+day_test_doc/build/dag
+day_test_doc/build/obj
+day_test_doc/build/bin

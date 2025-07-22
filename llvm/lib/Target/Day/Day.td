@@ -1,7 +1,7 @@
 include "llvm/Target/Target.td"
 include "DayRegisterInfo.td"
 include "DayInstrInfo.td"
-// include "DayCallingConv.td"
+include "DayCallingConv.td"
 
 
 def DayInstrInfo : InstrInfo {

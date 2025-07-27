@@ -1,9 +1,12 @@
-#ifndef DAY_TARGET_INFO_H
-#define DAY_TARGET_INFO_H
+#ifndef LLVM_LIB_TARGET_SPARC_TARGETINFO_SPARCTARGETINFO_H
+#define LLVM_LIB_TARGET_SPARC_TARGETINFO_SPARCTARGETINFO_H
 
 namespace llvm {
-    class Target;
-    Target &getTheDayTarget();
-}
 
-#endif
+class Target;
+
+    Target &getTheDayTarget();
+
+} // namespace llvm
+
+#endif // LLVM_LIB_TARGET_SPARC_TARGETINFO_SPARCTARGETINFO_H

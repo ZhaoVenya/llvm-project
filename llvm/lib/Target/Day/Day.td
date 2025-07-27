@@ -1,4 +1,6 @@
 include "llvm/Target/Target.td"
+include "llvm/TableGen/SearchableTable.td"
+
 include "DayRegisterInfo.td"
 include "DayInstrInfo.td"
 include "DayCallingConv.td"

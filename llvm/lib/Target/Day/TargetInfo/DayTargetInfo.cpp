@@ -5,13 +5,11 @@
 using namespace llvm;
 
 Target &llvm::getTheDayTarget() {
-	static Target TheDayTarget;
-	return TheDayTarget;
+  static Target TheDayTarget;
+  return TheDayTarget;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeDayTargetInfo() {
-  RegisterTarget<Triple::day,
-                 /*HasJIT=*/false>
-      X(getTheDayTarget(), "day", "Day (32-bit little endian)", "Day");
+  RegisterTarget<Triple::day, /*HasJIT=*/false> X(getTheDayTarget(),
+                                              "day", "Day", "Day");
 }
-

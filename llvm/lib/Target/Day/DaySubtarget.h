@@ -6,8 +6,10 @@
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/TargetParser/Triple.h"
 
+#include "DayFrameLowering.h"
 #include "DayISelLowering.h"
 #include "DayInstrInfo.h"
+#include "DayTargetMachine.h"
 
 #define GET_SUBTARGETINFO_HEADER
 #include "DayGenSubtargetInfo.inc"
@@ -15,10 +17,14 @@
 namespace llvm{
 class DaySubtarget : public DayGenSubtargetInfo{
 
+    // const DayTargetMachine &TM;
+
+
     virtual void anchor();
-    bool Is64Bit;
+    
     BitVector ReserveRegister;
     Triple TargetTriple;
+    bool Is64Bit;
     
     DayInstrInfo InstrInfo;
     DayTargetLowering TLInfo;

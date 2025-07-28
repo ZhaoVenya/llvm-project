@@ -1847,6 +1847,7 @@ Triple Triple::get64BitArchVariant() const {
   case Triple::tcele:
   case Triple::xcore:
   case Triple::xtensa:
+  case Triple::day:
     T.setArch(UnknownArch);
     break;
 

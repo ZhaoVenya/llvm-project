@@ -78,7 +78,7 @@ DayTargetMachine::DayTargetMachine(const Target &T, const Triple &TT, StringRef 
           getEffectiveRelocModel(RM),
           getEffectiveDayCodeModel(CM, getEffectiveRelocModel(RM), is64bit, JIT),
           OL), 
-    TLOF(std::make_unique<TargetLoweringObjectFile>()), 
+    TLOF(std::make_unique<DayELFTargetObjectFile>()), 
     is64Bit(is64bit)
 {
     initAsmInfo();

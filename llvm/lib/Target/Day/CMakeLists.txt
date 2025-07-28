@@ -23,6 +23,8 @@ add_llvm_target(DayCodeGen
   DayMachineFunctionInfo.cpp
   DaySubtarget.cpp
   DayTargetObjectFile.cpp
+  DayFrameLowering.cpp
+  DayISelLowering.cpp
   
 
   LINK_COMPONENTS

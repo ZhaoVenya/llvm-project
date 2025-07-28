@@ -1,9 +1,11 @@
 #ifndef DAYTARGETMACHINE_H_
 #define DAYTARGETMACHINE_H_
 
+#include "DayInstrInfo.h"
+#include "DaySubtarget.h"
 #include "llvm/CodeGen/CodeGenTargetMachineImpl.h"
-
-#include "DayGenSubtargetInfo.inc"
+#include "llvm/Target/TargetMachine.h"
+#include <optional>
 
 namespace llvm{
 

@@ -4,16 +4,26 @@
 
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
-// #include "DayFrameLowering.h"
-// #include "DayISelLowering.h"
+#include "llvm/TargetParser/Triple.h"
+
+#include "DayISelLowering.h"
 #include "DayInstrInfo.h"
 
+#define GET_SUBTARGETINFO_HEADER
 #include "DayGenSubtargetInfo.inc"
 
 namespace llvm{
 class DaySubtarget : public DayGenSubtargetInfo{
 
+    virtual void anchor();
+    bool Is64Bit;
+    BitVector ReserveRegister;
+    Triple TargetTriple;
+    
     DayInstrInfo InstrInfo;
+    DayTargetLowering TLInfo;
+    DayFrameLowering FrameLowering;
+
     // DayTargetLowering TLInfo;
     // SelectionDAGTargetInfo TSInfo;
     // DayFrameLowering FrameLowering;
@@ -35,6 +45,13 @@ public:
     // const SelectionDAGTargetInfo *getSelectionDAGInfo() const override {
     //     return &TSInfo;
     // }
+    void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
+    DaySubtarget &initializeSubtargetDependencies(StringRef CPU,
+                                                  StringRef TuneCPU,
+                                                  StringRef FS);
+
+    bool is64Bit() const { return Is64Bit;}
+
 };
 }
 

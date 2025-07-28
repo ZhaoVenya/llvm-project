@@ -2,14 +2,18 @@
 #define DAY_TARGETOBJECTFILE_H_
 
 
-using namespace llvm;
+#include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 
-namespace name
+namespace llvm
 {
 
-class SparcELFTargetObjectFile : public TargetLoweringObjectFileELF {
+class MCContext;
+class TargetMachine;
+
+class DayELFTargetObjectFile : public TargetLoweringObjectFileELF {
 public:
-  SparcELFTargetObjectFile() = default;
+  DayELFTargetObjectFile() = default;
+  void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
 
 };
 

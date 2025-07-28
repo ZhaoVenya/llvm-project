@@ -3,6 +3,10 @@ add_llvm_component_library(LLVMDayDesc
 
         LINK_COMPONENTS
         Support
-        CodeGenTypes
         MC
+        TargetParser
+        DayInfo
+
+        ADD_TO_COMPONENT
+        Day
 )

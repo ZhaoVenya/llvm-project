@@ -1,7 +1,7 @@
 #ifndef DAYREGISTERINFO_H_
 #define DAYREGISTERINFO_H_
 
-#include "DayTargetMachine.h"
+// #include "DayTargetMachine.h"
 
 #include "llvm/CodeGen/TargetRegisterInfo.h"
 

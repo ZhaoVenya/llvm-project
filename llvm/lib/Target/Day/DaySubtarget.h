@@ -18,8 +18,7 @@ namespace llvm{
 class DaySubtarget : public DayGenSubtargetInfo{
 
     // const DayTargetMachine &TM;
-
-
+    
     virtual void anchor();
     
     BitVector ReserveRegister;

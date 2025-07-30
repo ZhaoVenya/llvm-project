@@ -108,8 +108,9 @@ class ALU_I_JALR<string asmstr, bits<4> opcode> :
 /////////////////////////////////////////////////////////////////////////////////////
 def LoadTypeProfile : SDTypeProfile<1, 1, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>;
 
+
 def M_LOAD : SDNode<
-        "M_LOAD",
+        "DayISD::M_LOAD",
         LoadTypeProfile,
         [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
         SDNPMayLoad,SDNPMemOperand]>;
@@ -128,7 +129,7 @@ class ALU_L<string asmstr, bits<4> opcode, PatFrag OpNode> :
 def StoreTypeProfile : SDTypeProfile<0, 2, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>;
 
 def M_STORE : SDNode<
-        "M_STORE",
+        "DayISD::M_STORE",
         StoreTypeProfile,
         [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
         SDNPMayStore,SDNPMemOperand]>;

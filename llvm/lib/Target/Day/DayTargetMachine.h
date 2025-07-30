@@ -10,6 +10,9 @@
 namespace llvm{
 
 class DayTargetMachine : public CodeGenTargetMachineImpl {
+
+    // const DaySubtarget& Subtarget;
+
     std::unique_ptr<TargetLoweringObjectFile> TLOF;
     bool is64Bit;
     bool isJIT;

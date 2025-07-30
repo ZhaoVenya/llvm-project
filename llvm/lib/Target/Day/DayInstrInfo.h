@@ -2,7 +2,7 @@
 #define DAY_INSTR_INFO_H_
 
 
-
+// #include "DayTargetMachine.h"
 #include "DayRegisterInfo.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
 
@@ -27,7 +27,6 @@ namespace SPII {
 
 class DayInstrInfo : public DayGenInstrInfo {
   const DayRegisterInfo RI;
-  const DaySubtarget& Subtarget;
   virtual void anchor();
 public:
   explicit DayInstrInfo(DaySubtarget &ST);

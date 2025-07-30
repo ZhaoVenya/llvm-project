@@ -1,4 +1,5 @@
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/CodeGen/TargetPassConfig.h"
 
 #include "DayTargetMachine.h"
 #include "DayMachineFunctionInfo.h"
@@ -22,6 +23,12 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeDayTarget() {
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 // 能用到的子函数
+
+static cl::opt<bool>
+    BranchRelaxation("day-enable-branch-relax", cl::Hidden, cl::init(true),
+                     cl::desc("Relax out of range conditional branches"));
+
+
 static std::string computeDataLayout(const Triple &T) {
   // Sparc is typically big endian, but some are little.
     std::string Ret;
@@ -111,4 +118,52 @@ Day32TargetMachine::Day32TargetMachine(const Target &T, const Triple &TT,
 {
 
 }
+
+
+namespace {
+/// Day Code Generator Pass Configuration Options.
+class DayPassConfig : public TargetPassConfig {
+public:
+  DayPassConfig(DayTargetMachine &TM, PassManagerBase &PM)
+    : TargetPassConfig(TM, PM) {}
+
+  DayTargetMachine &getDayTargetMachine() const {
+    return getTM<DayTargetMachine>();
+  }
+
+  void addIRPasses() override;
+  bool addInstSelector() override;
+  void addPreEmitPass() override;
+};
+} // namespace
+
+
+
+TargetPassConfig *DayTargetMachine::createPassConfig(PassManagerBase &PM) {
+  return new DayPassConfig(*this, PM);
+}
+
+void DayPassConfig::addIRPasses() {
+  addPass(createAtomicExpandLegacyPass());
+
+  TargetPassConfig::addIRPasses();
+}
+
+bool DayPassConfig::addInstSelector() {
+  addPass(createDayISelDag(getDayTargetMachine()));
+  return false;
+}
+
+void DayPassConfig::addPreEmitPass(){
+  if (BranchRelaxation)
+    addPass(&BranchRelaxationPassID);
+
+  // addPass(createDayDelaySlotFillerPass());
+  // addPass(new InsertNOPLoad());
+  // addPass(new DetectRoundChange());
+  // addPass(new FixAllFDIVSQRT());
+  // addPass(new ErrataWorkaround());
+}
+
+
 

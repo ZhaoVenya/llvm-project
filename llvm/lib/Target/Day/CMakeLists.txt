@@ -5,6 +5,7 @@ set(LLVM_TARGET_DEFINITIONS Day.td)
 
 tablegen(LLVM DayGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM DayGenInstrInfo.inc -gen-instr-info)
+tablegen(LLVM DayGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM DayGenSearchableTables.inc -gen-searchable-tables)
 tablegen(LLVM DayGenSubtargetInfo.inc -gen-subtarget)
 
@@ -25,6 +26,7 @@ add_llvm_target(DayCodeGen
   DayTargetObjectFile.cpp
   DayFrameLowering.cpp
   DayISelLowering.cpp
+  DayISelDAGToDAG.cpp
   
 
   LINK_COMPONENTS

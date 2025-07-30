@@ -10,3 +10,10 @@ MachineFunctionInfo *DayMachineFunctionInfo::clone(
     const {
   return DestMF.cloneInfo<DayMachineFunctionInfo>(*this);
 }
+
+
+// 确保有构造函数实现
+// DayMachineFunctionInfo::DayMachineFunctionInfo(const Function &F, const TargetSubtargetInfo *STI)
+//     : MachineFunctionInfo(F) {
+
+// }

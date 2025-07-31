@@ -21,7 +21,9 @@ ReserveAppRegisters("day-reserve-app-registers", cl::Hidden, cl::init(false),
 
 
 // DayGenRegisterInfo的入口参数是RA,
-DayRegisterInfo::DayRegisterInfo() : DayGenRegisterInfo(Day::RA) {}
+DayRegisterInfo::DayRegisterInfo() : DayGenRegisterInfo(Day::RA),STI(STI) {
+  
+}
 
 const MCPhysReg*
 DayRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
@@ -97,7 +99,7 @@ bool DayRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   int64_t Offset = MFI.getObjectOffset(FI);
   uint64_t STACKSIZE =
-      ROUND_UP(MFI.getStackSize(), 16);
+      ROUND_UP(MFI.getStackSize(), STI.getFrameLowering()->getStackAlignment());
   Offset += static_cast<int64_t>(STACKSIZE);
 
   int64_t O = MI.getOperand(I + 1).getImm();

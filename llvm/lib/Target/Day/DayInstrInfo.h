@@ -28,6 +28,9 @@ namespace SPII {
 class DayInstrInfo : public DayGenInstrInfo {
   const DayRegisterInfo RI;
   virtual void anchor();
+
+protected:
+  const DaySubtarget &Subtarget;
 public:
   explicit DayInstrInfo(DaySubtarget &ST);
 

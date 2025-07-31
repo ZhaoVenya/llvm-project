@@ -288,18 +288,21 @@ class DayInstJ<dag outs, dag ins, string asmstr, string argstr> :
 
 /////////////////////////////////////////////////////////////////////////////////
 // 伪指令
-class DayInstPseudoBase<dag outs, dag ins, string asmstr, string argstr> 
-    : DayInst<outs, ins, asmstr, argstr, [], InstFormatPseudo>
-{
-    bits<32> im32; // 立即数值
-    bits<5> rd; // 输出寄存器
-
-    let Inst{31} = 0b0;
-    let Inst{30-13} = im32{17-0}; // 立即数值
-    let Inst{12-8}  = rd; // 输出寄存器
-    let Inst{3-0} = InstFormatPseudo.Value; // U类型指令的类型字段码
+class DayInstPseudoBase<dag outs, dag ins, string asmstr, string argstr="", list<dag> pattern=[]> 
+    : Instruction
+{   
+    let Namespace = "Day";
+    dag OutOperandList = outs;
+    dag InOperandList = ins;
+    let AsmString = asmstr # !if(!empty(argstr),"","\t" # argstr); // 使用 argstr 保持一致性
+    let Pattern = pattern;
 
     let isPseudo = 1;
+    let isCodeGenOnly = 1;
+
+    let hasSideEffects = 1; // 调整栈本身就是一种副作用
+    let mayLoad = 0;       // ADJCALLSTACKDOWN 本身不直接加载数据，而是调整栈指针
+    let mayStore = 0;      // ADJCALLSTACKDOWN 本身不直接存储数据，而是调整栈指针
 }
 
 // class DayInstU<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
@@ -308,9 +311,7 @@ class DayInstPseudoBase<dag outs, dag ins, string asmstr, string argstr>
 // }
 
 
-class DayInstPseudo<dag outs, dag ins, list<dag> pattern, string asmstr = "">
-    : DayInstPseudoBase<outs, ins, asmstr, ""> {
+class DayInstPseudo<dag outs, dag ins, list<dag> pattern=[], string asmstr = "">
+    : DayInstPseudoBase<outs, ins, asmstr, "">;
 
-    let Pattern = pattern;
-    let isCodeGenOnly = 1;
-}
+

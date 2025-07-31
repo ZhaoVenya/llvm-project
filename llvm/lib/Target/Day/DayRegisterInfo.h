@@ -1,3 +1,5 @@
+// 这是DayRegisterInfo.h文件
+
 #ifndef DAYREGISTERINFO_H_
 #define DAYREGISTERINFO_H_
 
@@ -9,7 +11,12 @@
 #include "DayGenRegisterInfo.inc"
 
 namespace llvm {
+  class DaySubtarget;
+  
 struct DayRegisterInfo : public DayGenRegisterInfo {
+  
+  const DaySubtarget &STI;
+
   DayRegisterInfo();
 
   /// Code Generation virtual methods...

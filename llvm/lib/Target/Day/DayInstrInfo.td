@@ -191,6 +191,20 @@ class ALU_J<string asmstr> :
 
 //////////////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////////////
+// class ALU_C_RR<string asmstr, bits<4> opcode, SDNode OpNode> : 
+//         DayInstC<(out GPR:$rd),(ins GPR:$rs1),asmstr, argstr>;
+
+// class ALU_C_RF<string asmstr, bits<4> opcode, SDNode OpNode> : 
+//         DayInstC<(out FPR:$rd),(ins GPR:$rs1),asmstr, argstr>;
+
+// class ALU_C_FR<string asmstr, bits<4> opcode, SDNode OpNode> : 
+//         DayInstC<(out GPR:$rd),(ins FPR:$rs1),asmstr, argstr>;
+
+// class ALU_C_FF<string asmstr, bits<4> opcode, SDNode OpNode> : 
+//         DayInstC<(out FPR:$rd),(ins FPR:$rs1),asmstr, argstr>;
+
+
 def ADD : ALU_RR_I<"add", 0b0000, add>;
 def SUB : ALU_RR_I<"sub", 0b0001, sub>;
 def MUL : ALU_RR_I<"mul", 0b0010, mul>;
@@ -309,27 +323,64 @@ def JAL: ALU_J<"jal">{
 def : Pat<(br bb:$dst), (JAL bb:$dst)>;
 
 
-
 ////////////////////////////////////////////
 // 伪指令
-
 def ADJCALLSTACKDOWN : DayInstPseudo<(outs), (ins simm32:$amount, simm32:$align)> {
     let AsmString = "adjcallstackdown\t$amount, $align";
 }
-
 def ADJCALLSTACKUP : DayInstPseudo<(outs), (ins simm32:$amount, simm32:$align)> {
     let AsmString = "adjcallstackup\t$amount, $align";
 }
-
 // 假设你需要通用的返回伪指令
 def RET_PSEUDO : DayInstPseudo<(outs), (ins)> {
     let AsmString = "ret";
     // 如果这是通用的返回，它可能会在指令选择阶段匹配 return 指令
     // let Pattern = [(ret)]; 
 }
-
 // 假设你需要异常捕获返回伪指令
 def CATCHRET_PSEUDO : DayInstPseudo<(outs), (ins)> {
     let AsmString = "catchret";
 }
 
+//////////////////////////////////////////////////////////////
+// ... (之前的 DayInstCommon 和 DayInst 定义)
+
+// GPR 到 GPR 的拷贝
+def MOVRR : DayInst<(out GPR:$rd), (ins GPR:$rs1), "movrr", "$rd, $rs1",
+  [(set GPR:$rd, GPR:$rs1)], InstFormatC>,
+{
+  let Inst{7-4} = 0b0000;
+  let Inst{17-13} = rs1;
+  let Inst{12-8}  = rd;
+  let Inst{3-0} = InstFormatC.Value;
+}
+
+// GPR 到 FPR 的拷贝
+def MOVRF : DayInst<(out FPR:$rd), (ins GPR:$rs1), "movrf", "$rd, $rs1",
+  [(set FPR:$rd, GPR:$rs1)], InstFormatC>,
+{
+  let Inst{7-4} = 0b0001;
+  let Inst{17-13} = rs1;
+  let Inst{12-8}  = rd;
+  let Inst{3-0} = InstFormatC.Value;
+}
+
+// FPR 到 GPR 的拷贝
+def MOVFR : DayInst<(out GPR:$rd), (ins FPR:$rs1), "movfr", "$rd, $rs1",
+  [(set GPR:$rd, FPR:$rs1)], InstFormatC>,
+{
+  let Inst{7-4} = 0b0010;
+  let Inst{17-13} = rs1;
+  let Inst{12-8}  = rd;
+  let Inst{3-0} = InstFormatC.Value;
+}
+
+// FPR 到 FPR 的拷贝
+def MOVFF : DayInst<(out FPR:$rd), (ins FPR:$rs1), "movff", "$rd, $rs1",
+  [(set FPR:$rd, FPR:$rs1)], InstFormatC>,
+{
+  let Inst{7-4} = 0b0011;
+  let Inst{17-13} = rs1;
+  let Inst{12-8}  = rd;
+  let Inst{3-0} = InstFormatC.Value;
+}

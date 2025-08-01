@@ -18,6 +18,7 @@ def InstFormatS      : InstFormat<0b0101>;
 def InstFormatB      : InstFormat<0b0110>;
 def InstFormatU      : InstFormat<0b0111>;
 def InstFormatJ      : InstFormat<0b1000>;
+def InstFormatC      : InstFormat<0b1001>;
 
 
 // 这里定义不同数据类型对应的字段码，比如整数、浮点数等
@@ -44,14 +45,15 @@ class DayTypeCode<string typename, bits<4> typecode> {
 }
 
 // 不同类型指令对应的“类型字段”的码值
-def DayTypeR      : DayTypeCode<"R",  0b0001>;
-def DayTypeR4     : DayTypeCode<"R4", 0b0010>;
-def DayTypeI      : DayTypeCode<"I",  0b0011>;
-def DayTypeL      : DayTypeCode<"L",  0b0100>;
-def DayTypeS      : DayTypeCode<"S",  0b0101>;
-def DayTypeB      : DayTypeCode<"B",  0b0110>;
-def DayTypeU      : DayTypeCode<"U",  0b0111>;
-def DayTypeJ      : DayTypeCode<"J",  0b1000>;
+def DayTypeR      : DayTypeCode<"R",  0b0001>; // 寄存器操作指令
+def DayTypeR4     : DayTypeCode<"R4", 0b0010>; // R4操作指令
+def DayTypeI      : DayTypeCode<"I",  0b0011>; // 立即数操作指令
+def DayTypeL      : DayTypeCode<"L",  0b0100>; // 加载指令
+def DayTypeS      : DayTypeCode<"S",  0b0101>; // 存储指令
+def DayTypeB      : DayTypeCode<"B",  0b0110>; // 分支指令
+def DayTypeU      : DayTypeCode<"U",  0b0111>; // 加载大立即数指令
+def DayTypeJ      : DayTypeCode<"J",  0b1000>; // 跳转指令
+def DayTypeC      : DayTypeCode<"C",  0b1001>; // 拷贝指令
 
 
 class DayInstCommon<dag outs, dag ins, string asmstr, string argstr, list<dag> pattern, InstFormat format>:
@@ -313,5 +315,25 @@ class DayInstPseudoBase<dag outs, dag ins, string asmstr, string argstr="", list
 
 class DayInstPseudo<dag outs, dag ins, list<dag> pattern=[], string asmstr = "">
     : DayInstPseudoBase<outs, ins, asmstr, "">;
+
+/////////////////////////////////////////////////////////////////////////////////
+// 拷贝指令
+class DayInstCBase<dag outs, dag ins, string asmstr, string argstr>: 
+    DayInst<outs, ins, asmstr, argstr, [], InstFormatL>
+{
+    bits<5> rs1; // 第一个输入寄存器
+    bits<5> rd; // 输出寄存器
+
+    let Inst{17-13} = rs1; // 第一个输入寄存器
+    let Inst{12-8}  = rd; // 输出寄存器
+    let Inst{3-0} = InstFormatC.Value; // L类型指令的类型字段码
+}
+
+
+class DayInstC<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+    DayInstCBase<outs, ins, asmstr, argstr> {
+    let Inst{7-4} = opcode; // 操作码
+}
+
 
 

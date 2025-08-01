@@ -204,6 +204,52 @@ void DayInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
                                  MCRegister SrcReg, bool KillSrc,
                                  bool RenamableDest, bool RenamableSrc) const {
 
+  const TargetRegisterInfo *TRI = Subtarget.getRegisterInfo();
+  
+  if (Day::GPRRegClass.contains(DestReg, SrcReg)) {
+    BuildMI(MBB, I, DL, get(Day::ADDI), DestReg)
+        .addReg(SrcReg,
+                getKillRegState(KillSrc) | getRenamableRegState(RenamableSrc))
+        .addImm(0);
+    return;
+  }
+
+
+  if (Day::FPRRegClass.contains(DestReg, SrcReg)) {
+    BuildMI(MBB, I, DL, get(Day::PseudoMV_FPR32INX), DestReg)
+        .addReg(SrcReg,
+                getKillRegState(KillSrc) | getRenamableRegState(RenamableSrc));
+    return;
+  }
+
+
+  if (RISCV::FPR32RegClass.contains(DestReg, SrcReg)) {
+    BuildMI(MBB, I, DL, get(RISCV::FSGNJ_S), DestReg)
+        .addReg(SrcReg, getKillRegState(KillSrc))
+        .addReg(SrcReg, getKillRegState(KillSrc));
+    return;
+  }
+
+
+  if (RISCV::FPR32RegClass.contains(DestReg) &&
+      RISCV::GPRRegClass.contains(SrcReg)) {
+    BuildMI(MBB, I, DL, get(RISCV::FMV_W_X), DestReg)
+        .addReg(SrcReg, getKillRegState(KillSrc));
+    return;
+  }
+
+  if (RISCV::GPRRegClass.contains(DestReg) &&
+      RISCV::FPR32RegClass.contains(SrcReg)) {
+    BuildMI(MBB, I, DL, get(RISCV::FMV_X_W), DestReg)
+        .addReg(SrcReg, getKillRegState(KillSrc));
+    return;
+  }
+
+
+  const TargetRegisterClass *RegClass =
+      TRI->getCommonMinimalPhysRegClass(SrcReg, DestReg);
+
+  llvm_unreachable("Impossible reg-to-reg copy");
 }
 
 

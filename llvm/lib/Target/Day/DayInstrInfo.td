@@ -346,41 +346,21 @@ def CATCHRET_PSEUDO : DayInstPseudo<(outs), (ins)> {
 // ... (之前的 DayInstCommon 和 DayInst 定义)
 
 // GPR 到 GPR 的拷贝
-def MOVRR : DayInst<(out GPR:$rd), (ins GPR:$rs1), "movrr", "$rd, $rs1",
-  [(set GPR:$rd, GPR:$rs1)], InstFormatC>,
-{
+def MOVRR : DayInstCBase<(outs GPR:$rd), (ins GPR:$rs1), "movrr">{
   let Inst{7-4} = 0b0000;
-  let Inst{17-13} = rs1;
-  let Inst{12-8}  = rd;
-  let Inst{3-0} = InstFormatC.Value;
 }
 
 // GPR 到 FPR 的拷贝
-def MOVRF : DayInst<(out FPR:$rd), (ins GPR:$rs1), "movrf", "$rd, $rs1",
-  [(set FPR:$rd, GPR:$rs1)], InstFormatC>,
-{
+def MOVRF : DayInstCBase<(outs GPR:$rd), (ins GPR:$rs1), "movrf">{
   let Inst{7-4} = 0b0001;
-  let Inst{17-13} = rs1;
-  let Inst{12-8}  = rd;
-  let Inst{3-0} = InstFormatC.Value;
 }
 
 // FPR 到 GPR 的拷贝
-def MOVFR : DayInst<(out GPR:$rd), (ins FPR:$rs1), "movfr", "$rd, $rs1",
-  [(set GPR:$rd, FPR:$rs1)], InstFormatC>,
-{
+def MOVFR : DayInstCBase<(outs GPR:$rd), (ins GPR:$rs1), "movfr">{
   let Inst{7-4} = 0b0010;
-  let Inst{17-13} = rs1;
-  let Inst{12-8}  = rd;
-  let Inst{3-0} = InstFormatC.Value;
 }
 
 // FPR 到 FPR 的拷贝
-def MOVFF : DayInst<(out FPR:$rd), (ins FPR:$rs1), "movff", "$rd, $rs1",
-  [(set FPR:$rd, FPR:$rs1)], InstFormatC>,
-{
+def MOVFF : DayInstCBase<(outs GPR:$rd), (ins GPR:$rs1), "movfr">{
   let Inst{7-4} = 0b0011;
-  let Inst{17-13} = rs1;
-  let Inst{12-8}  = rd;
-  let Inst{3-0} = InstFormatC.Value;
 }

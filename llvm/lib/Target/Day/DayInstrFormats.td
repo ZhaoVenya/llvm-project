@@ -318,22 +318,28 @@ class DayInstPseudo<dag outs, dag ins, list<dag> pattern=[], string asmstr = "">
 
 /////////////////////////////////////////////////////////////////////////////////
 // 拷贝指令
-class DayInstCBase<dag outs, dag ins, string asmstr, string argstr>: 
-    DayInst<outs, ins, asmstr, argstr, [], InstFormatL>
+class DayInstCBase<dag outs, dag ins, string asmstr>: 
+    DayInst<outs, ins, asmstr, "$rd, $rs1", [], InstFormatC>
 {
     bits<5> rs1; // 第一个输入寄存器
     bits<5> rd; // 输出寄存器
 
+    // let AsmString = asmstr # !if(!empty(argstr),"","\t" # argstr);
+
     let Inst{17-13} = rs1; // 第一个输入寄存器
     let Inst{12-8}  = rd; // 输出寄存器
     let Inst{3-0} = InstFormatC.Value; // L类型指令的类型字段码
+
+    let mayLoad = 0;
+    let mayStore = 0;
+    let hasSideEffects = 0;
 }
 
 
-class DayInstC<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
-    DayInstCBase<outs, ins, asmstr, argstr> {
-    let Inst{7-4} = opcode; // 操作码
-}
+// class DayInstC<dag outs, dag ins, string asmstr, string argstr, bits<4> opcode> : 
+//     DayInstCBase<outs, ins, asmstr, argstr> {
+//     let Inst{7-4} = opcode; // 操作码
+// }
 
 
 

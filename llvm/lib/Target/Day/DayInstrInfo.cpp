@@ -112,7 +112,7 @@ void DayInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
     MachineFrameInfo &MFI = MF->getFrameInfo();
 
     unsigned Opcode;
-    bool IsScalableVector = true;
+    // bool IsScalableVector = true;
     unsigned Size = MFI.getObjectSize(FI);
 
     if (Day::GPRRegClass.hasSubClassEq(RC)) {
@@ -135,7 +135,7 @@ void DayInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
         break;
       }
 
-      IsScalableVector = false;
+      // IsScalableVector = false;
     }
 
     MachineMemOperand *MMO = MF->getMachineMemOperand(
@@ -162,7 +162,7 @@ void DayInstrInfo::loadRegFromStackSlot(
     MachineFrameInfo &MFI = MF->getFrameInfo();
 
     unsigned Opcode;
-    bool IsScalableVector = true;
+    // bool IsScalableVector = true;
     unsigned Size = MFI.getObjectSize(FI);
 
     if (Day::GPRRegClass.hasSubClassEq(RC)) {
@@ -183,7 +183,6 @@ void DayInstrInfo::loadRegFromStackSlot(
           llvm_unreachable("Unsupported GPR load size from stack slot");
         break;
       }
-      IsScalableVector = false;
     }
 
     MachineMemOperand *MMO = MF->getMachineMemOperand(
@@ -237,18 +236,12 @@ void DayInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
 }
 
 
-Register DayInstrInfo::getGlobalBaseReg(MachineFunction *MF) const {
-  return;
-}
+
 
 unsigned DayInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
- return 0;
+ return 4;
 }
 
-bool DayInstrInfo::expandPostRAPseudo(MachineInstr &MI) const {
-    
-  return false;
-}
 
 
 

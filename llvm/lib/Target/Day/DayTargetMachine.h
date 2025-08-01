@@ -15,7 +15,7 @@ class DayTargetMachine : public CodeGenTargetMachineImpl {
 
     std::unique_ptr<TargetLoweringObjectFile> TLOF;
     bool is64Bit;
-    bool isJIT;
+    // bool isJIT;
     // mutable StringMap<std::unique_ptr<DaySubtarget>> SubtargetMap;
 
 public:

@@ -3,6 +3,19 @@
 
 using namespace llvm;
 
+
+/*
+ DayFrameLowering class的构造函数，继承 TargetFrameLowering.
+
+ TargetFrameLowering的构造函数有几个入口参数：
+
+ StackDirection D: 该架构对应栈的生长方式，一般都是向下生长。
+ Align StackAl：栈帧的对齐方式
+ int LAO: 这个参数代表了本地变量区域的偏移量（Local Area Offset）。
+ Align TransAl: 这个参数是临时堆栈区域的对齐方式.
+ bool StackReal: 这个参数是一个布尔值，用于指示栈是否可以重新对齐.
+
+*/
 DayFrameLowering::DayFrameLowering(const DaySubtarget &ST)
     : TargetFrameLowering(TargetFrameLowering::StackGrowsDown,
                           ST.is64Bit() ? Align(16) : Align(8), 0,

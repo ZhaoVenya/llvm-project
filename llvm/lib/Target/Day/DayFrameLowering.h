@@ -29,6 +29,7 @@ public:
                                 MachineBasicBlock::iterator I) const override;
 
 protected:
+  const DaySubtarget &STI;
   // 这个函数返回的是一个bool值，用来表示当前函数时都需要实现帧指针
   // 帧指针相对于栈指针，基地址比较稳定
   bool hasFPImpl(const MachineFunction &MF) const override;

@@ -1,5 +1,7 @@
 #include "DayFrameLowering.h"
+#include "DayInstrInfo.h"
 #include "DaySubtarget.h"
+#include "DayMachineFunctionInfo.h"
 
 using namespace llvm;
 

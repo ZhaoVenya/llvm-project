@@ -57,6 +57,17 @@ public:
 
     bool is64Bit() const { return Is64Bit;}
 
+
+    MVT getXLenVT() const {
+        return MVT::i32;
+    }
+
+    unsigned getXLen() const {
+        return 32;
+    }
+
+    DayABI::ABI getTargetABI() const { return TargetABI; }
+
 };
 }
 

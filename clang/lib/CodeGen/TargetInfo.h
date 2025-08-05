@@ -614,6 +614,10 @@ createWinX86_64TargetCodeGenInfo(CodeGenModule &CGM, X86AVXABILevel AVXLevel);
 std::unique_ptr<TargetCodeGenInfo>
 createXCoreTargetCodeGenInfo(CodeGenModule &CGM);
 
+std::unique_ptr<TargetCodeGenInfo> 
+createDayTargetCodeGenInfo(CodeGenModule &CGM);
+
+
 } // namespace CodeGen
 } // namespace clang
 

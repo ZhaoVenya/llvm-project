@@ -17,7 +17,8 @@ MachineFunctionInfo *DayMachineFunctionInfo::clone(
 }
 
 DayMachineFunctionInfo::DayMachineFunctionInfo(const Function &F,
-                                                   const DaySubtarget *STI) {
+                                                   const DaySubtarget *STI):
+    Subtarget(static_cast<const DaySubtarget *>(STI)){
 
   // The default stack probe size is 4096 if the function has no
   // stack-probe-size attribute. This is a safe default because it is the

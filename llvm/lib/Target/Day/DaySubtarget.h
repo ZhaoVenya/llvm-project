@@ -10,6 +10,7 @@
 #include "DayISelLowering.h"
 #include "DayInstrInfo.h"
 #include "DayTargetMachine.h"
+#include "MCTargetDesc/DayBaseInfo.h"
 
 #define GET_SUBTARGETINFO_HEADER
 #include "DayGenSubtargetInfo.inc"
@@ -66,7 +67,7 @@ public:
         return 32;
     }
 
-    DayABI::ABI getTargetABI() const { return TargetABI; }
+    DayABI::ABI getTargetABI() const { return DayABI::ABI_ILP32F; }
 
 };
 }

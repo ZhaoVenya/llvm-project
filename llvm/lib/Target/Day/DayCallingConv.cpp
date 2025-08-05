@@ -1,8 +1,22 @@
 #include "DayCallingConv.h"
 #include "DaySubtarget.h"
+#include "DayRegisterInfo.h"
+#include "MCTargetDesc/DayBaseInfo.h"
 #include "llvm/CodeGen/CallingConvLower.h"
 
 using namespace llvm;
+
+static const MCPhysReg ArgFPRs[] = {
+  Day::F00, Day::F01, Day::F02, Day::F03, Day::F04, Day::F05, Day::F06, Day::F07,
+  Day::F08, Day::F09, Day::F10, Day::F11, Day::F12, Day::F13, Day::F14, Day::F15,
+  Day::F16, Day::F17, Day::F18, Day::F19, Day::F20, Day::F21, Day::F22, Day::F23,
+  Day::F24, Day::F25, Day::F26, Day::F27, Day::F28, Day::F29, Day::F30, Day::F31
+};
+
+
+static const MCPhysReg ArgGPRs[] = {
+  Day::A0, Day::A1, Day::A2, Day::A3, Day::A4, Day::A5, Day::A6, Day::A7
+};
 
 // Implements the Day calling convention. Returns true upon failure.
 bool llvm::CC_Day(unsigned ValNo, MVT ValVT, MVT LocVT,
@@ -11,15 +25,17 @@ bool llvm::CC_Day(unsigned ValNo, MVT ValVT, MVT LocVT,
   const MachineFunction &MF = State.getMachineFunction();
   const DataLayout &DL = MF.getDataLayout();
   const DaySubtarget &Subtarget = MF.getSubtarget<DaySubtarget>();
-  const DayTargetLowering &TLI = *Subtarget.getTargetLowering();
+  // const DayTargetLowering &TLI = static_cast<const DayTargetLowering &>(*Subtarget.getTargetLowering());
 
   unsigned XLen = Subtarget.getXLen();
   MVT XLenVT = Subtarget.getXLenVT();
 
   // Static chain parameter must not be passed in normal argument registers,
   // so we assign t2 for it as done in GCC's __builtin_call_with_static_chain
+  // 判断当前参数是否具有静态链(static chine)的属性,
+  // 如果具有静态链属性就会把这个参数分配到一个临时寄存器T2中.
   if (ArgFlags.isNest()) {
-    if (MCRegister Reg = State.AllocateReg(Day::A0)) {
+    if (MCRegister Reg = State.AllocateReg(Day::T2)) {
       State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
       return false;
     }
@@ -27,101 +43,34 @@ bool llvm::CC_Day(unsigned ValNo, MVT ValVT, MVT LocVT,
 
   // Any return value split in to more than two values can't be returned
   // directly. Vectors are returned via the available vector registers.
+  // 数据类型是vector,还是返回数值,并且返回数值的编号大于1(也就是至少被拆分了3部分).
   if (!LocVT.isVector() && IsRet && ValNo > 1)
     return true;
 
   // UseGPRForF16_F32 if targeting one of the soft-float ABIs, if passing a
   // variadic argument, or if no F16/F32 argument registers are available.
-  bool UseGPRForF16_F32 = true;
+  bool UseGPRForF32 = true;
   // UseGPRForF64 if targeting soft-float ABIs or an FLEN=32 ABI, if passing a
   // variadic argument, or if no F64 argument registers are available.
-  bool UseGPRForF64 = true;
+  // bool UseGPRForF64 = true;
 
   DayABI::ABI ABI = Subtarget.getTargetABI();
   switch (ABI) {
   default:
     llvm_unreachable("Unexpected ABI");
-  case DayABI::ABI_ILP32:
-  case DayABI::ABI_ILP32E:
-  case DayABI::ABI_LP64:
-  case DayABI::ABI_LP64E:
-    break;
   case DayABI::ABI_ILP32F:
-  case DayABI::ABI_LP64F:
-    UseGPRForF16_F32 = !IsFixed;
-    break;
-  case DayABI::ABI_ILP32D:
-  case DayABI::ABI_LP64D:
-    UseGPRForF16_F32 = !IsFixed;
-    UseGPRForF64 = !IsFixed;
+    UseGPRForF32 = !IsFixed;
     break;
   }
 
-  if ((LocVT == MVT::f16 || LocVT == MVT::bf16) && !UseGPRForF16_F32) {
-    if (MCRegister Reg = State.AllocateReg(ArgFPR16s)) {
+
+  if (LocVT == MVT::f32 && !UseGPRForF32) {
+    if (MCRegister Reg = State.AllocateReg(ArgFPRs)) {
       State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
       return false;
     }
   }
 
-  if (LocVT == MVT::f32 && !UseGPRForF16_F32) {
-    if (MCRegister Reg = State.AllocateReg(ArgFPR32s)) {
-      State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-      return false;
-    }
-  }
-
-  if (LocVT == MVT::f64 && !UseGPRForF64) {
-    if (MCRegister Reg = State.AllocateReg(ArgFPR64s)) {
-      State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-      return false;
-    }
-  }
-
-  if ((ValVT == MVT::f16 && Subtarget.hasStdExtZhinxmin())) {
-    if (MCRegister Reg = State.AllocateReg(getArgGPR16s(ABI))) {
-      State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-      return false;
-    }
-  }
-
-  if (ValVT == MVT::f32 && Subtarget.hasStdExtZfinx()) {
-    if (MCRegister Reg = State.AllocateReg(getArgGPR32s(ABI))) {
-      State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-      return false;
-    }
-  }
-
-  ArrayRef<MCPhysReg> ArgGPRs = Day::getArgGPRs(ABI);
-
-  // Zdinx use GPR without a bitcast when possible.
-  if (LocVT == MVT::f64 && XLen == 64 && Subtarget.hasStdExtZdinx()) {
-    if (MCRegister Reg = State.AllocateReg(ArgGPRs)) {
-      State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-      return false;
-    }
-  }
-
-  // FP smaller than XLen, uses custom GPR.
-  if (LocVT == MVT::f16 || LocVT == MVT::bf16 ||
-      (LocVT == MVT::f32 && XLen == 64)) {
-    if (MCRegister Reg = State.AllocateReg(ArgGPRs)) {
-      LocVT = XLenVT;
-      State.addLoc(
-          CCValAssign::getCustomReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-      return false;
-    }
-  }
-
-  // Bitcast FP to GPR if we can use a GPR register.
-  if ((XLen == 32 && LocVT == MVT::f32) || (XLen == 64 && LocVT == MVT::f64)) {
-    if (MCRegister Reg = State.AllocateReg(ArgGPRs)) {
-      LocVT = XLenVT;
-      LocInfo = CCValAssign::BCvt;
-      State.addLoc(CCValAssign::getReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-      return false;
-    }
-  }
 
   // If this is a variadic argument, the Day calling convention requires
   // that it is assigned an 'even' or 'aligned' register if it has 8-byte
@@ -135,8 +84,8 @@ bool llvm::CC_Day(unsigned ValNo, MVT ValVT, MVT LocVT,
   // changed when RV32E/ILP32E is ratified.
   unsigned TwoXLenInBytes = (2 * XLen) / 8;
   if (!IsFixed && ArgFlags.getNonZeroOrigAlign() == TwoXLenInBytes &&
-      DL.getTypeAllocSize(OrigTy) == TwoXLenInBytes &&
-      ABI != DayABI::ABI_ILP32E) {
+      DL.getTypeAllocSize(OrigTy) == TwoXLenInBytes) {
+
     unsigned RegIdx = State.getFirstUnallocated(ArgGPRs);
     // Skip 'odd' register if necessary.
     if (RegIdx != std::size(ArgGPRs) && RegIdx % 2 == 1)
@@ -150,34 +99,6 @@ bool llvm::CC_Day(unsigned ValNo, MVT ValVT, MVT LocVT,
   assert(PendingLocs.size() == PendingArgFlags.size() &&
          "PendingLocs and PendingArgFlags out of sync");
 
-  // Handle passing f64 on RV32D with a soft float ABI or when floating point
-  // registers are exhausted.
-  if (XLen == 32 && LocVT == MVT::f64) {
-    assert(PendingLocs.empty() && "Can't lower f64 if it is split");
-    // Depending on available argument GPRS, f64 may be passed in a pair of
-    // GPRs, split between a GPR and the stack, or passed completely on the
-    // stack. LowerCall/LowerFormalArguments/LowerReturn must recognise these
-    // cases.
-    MCRegister Reg = State.AllocateReg(ArgGPRs);
-    if (!Reg) {
-      int64_t StackOffset = State.AllocateStack(8, Align(8));
-      State.addLoc(
-          CCValAssign::getMem(ValNo, ValVT, StackOffset, LocVT, LocInfo));
-      return false;
-    }
-    LocVT = MVT::i32;
-    State.addLoc(CCValAssign::getCustomReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-    MCRegister HiReg = State.AllocateReg(ArgGPRs);
-    if (HiReg) {
-      State.addLoc(
-          CCValAssign::getCustomReg(ValNo, ValVT, HiReg, LocVT, LocInfo));
-    } else {
-      int64_t StackOffset = State.AllocateStack(4, Align(4));
-      State.addLoc(
-          CCValAssign::getCustomMem(ValNo, ValVT, StackOffset, LocVT, LocInfo));
-    }
-    return false;
-  }
 
   // Split arguments might be passed indirectly, so keep track of the pending
   // values. Split vectors are passed via a mix of registers and indirectly, so
@@ -195,60 +116,27 @@ bool llvm::CC_Day(unsigned ValNo, MVT ValVT, MVT LocVT,
 
   // If the split argument only had two elements, it should be passed directly
   // in registers or on the stack.
-  if (ValVT.isScalarInteger() && ArgFlags.isSplitEnd() &&
-      PendingLocs.size() <= 2) {
-    assert(PendingLocs.size() == 2 && "Unexpected PendingLocs.size()");
-    // Apply the normal calling convention rules to the first half of the
-    // split argument.
-    CCValAssign VA = PendingLocs[0];
-    ISD::ArgFlagsTy AF = PendingArgFlags[0];
-    PendingLocs.clear();
-    PendingArgFlags.clear();
-    return CC_DayAssign2XLen(
-        XLen, State, VA, AF, ValNo, ValVT, LocVT, ArgFlags,
-        ABI == DayABI::ABI_ILP32E || ABI == DayABI::ABI_LP64E);
-  }
+  // 
+  // if (ValVT.isScalarInteger() && ArgFlags.isSplitEnd() &&
+  //     PendingLocs.size() <= 2) {
+  //   assert(PendingLocs.size() == 2 && "Unexpected PendingLocs.size()");
+  //   // Apply the normal calling convention rules to the first half of the
+  //   // split argument.
+  //   CCValAssign VA = PendingLocs[0];
+  //   ISD::ArgFlagsTy AF = PendingArgFlags[0];
+  //   PendingLocs.clear();
+  //   PendingArgFlags.clear();
+  //   return CC_DayAssign2XLen(
+  //       XLen, State, VA, AF, ValNo, ValVT, LocVT, ArgFlags,
+  //       ABI == DayABI::ABI_ILP32E || ABI == DayABI::ABI_LP64E);
+  // }
 
   // Allocate to a register if possible, or else a stack slot.
   MCRegister Reg;
   unsigned StoreSizeBytes = XLen / 8;
   Align StackAlign = Align(XLen / 8);
 
-  if (ValVT.isVector() || ValVT.isDayVectorTuple()) {
-    Reg = allocateRVVReg(ValVT, ValNo, State, TLI);
-    if (Reg) {
-      // Fixed-length vectors are located in the corresponding scalable-vector
-      // container types.
-      if (ValVT.isFixedLengthVector()) {
-        LocVT = TLI.getContainerForFixedLengthVector(LocVT);
-        State.addLoc(
-            CCValAssign::getCustomReg(ValNo, ValVT, Reg, LocVT, LocInfo));
-        return false;
-      }
-    } else {
-      // For return values, the vector must be passed fully via registers or
-      // via the stack.
-      // FIXME: The proposed vector ABI only mandates v8-v15 for return values,
-      // but we're using all of them.
-      if (IsRet)
-        return true;
-      // Try using a GPR to pass the address
-      if ((Reg = State.AllocateReg(ArgGPRs))) {
-        LocVT = XLenVT;
-        LocInfo = CCValAssign::Indirect;
-      } else if (ValVT.isScalableVector()) {
-        LocVT = XLenVT;
-        LocInfo = CCValAssign::Indirect;
-      } else {
-        StoreSizeBytes = ValVT.getStoreSize();
-        // Align vectors to their element sizes, being careful for vXi1
-        // vectors.
-        StackAlign = MaybeAlign(ValVT.getScalarSizeInBits() / 8).valueOrOne();
-      }
-    }
-  } else {
-    Reg = State.AllocateReg(ArgGPRs);
-  }
+  Reg = State.AllocateReg(ArgGPRs);
 
   int64_t StackOffset =
       Reg ? 0 : State.AllocateStack(StoreSizeBytes, StackAlign);
@@ -271,9 +159,7 @@ bool llvm::CC_Day(unsigned ValNo, MVT ValVT, MVT LocVT,
     return false;
   }
 
-  assert(((ValVT.isFloatingPoint() && !ValVT.isVector()) || LocVT == XLenVT ||
-          (TLI.getSubtarget().hasVInstructions() &&
-           (ValVT.isVector() || ValVT.isDayVectorTuple()))) &&
+  assert(((ValVT.isFloatingPoint() && !ValVT.isVector()) || LocVT == XLenVT) &&
          "Expected an XLenVT or vector types at this stage");
 
   if (Reg) {

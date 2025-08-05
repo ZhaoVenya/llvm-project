@@ -20,9 +20,8 @@ using namespace llvm;
 */
 DayFrameLowering::DayFrameLowering(const DaySubtarget &ST)
     : TargetFrameLowering(TargetFrameLowering::StackGrowsDown,
-                          ST.is64Bit() ? Align(16) : Align(8), 0,
-                          ST.is64Bit() ? Align(16) : Align(8),
-                          /*StackRealignable=*/false) {
+                          Align(8), 0, Align(8),
+                          /*StackRealignable=*/false),STI(STI) {
 
 }
 
@@ -32,7 +31,7 @@ void DayFrameLowering::emitPrologue(MachineFunction &MF,
 
     MachineFrameInfo &MFI = MF.getFrameInfo();
     auto *RVFI = MF.getInfo<DayMachineFunctionInfo>();
-    const DayRegisterInfo *RI = STI.getRegisterInfo();
+    const DayRegisterInfo *RI = static_cast<const DayRegisterInfo *>(STI.getRegisterInfo());
     const DayInstrInfo *TII = STI.getInstrInfo();
     MachineBasicBlock::iterator MBBI = MBB.begin();
 
@@ -47,8 +46,20 @@ void DayFrameLowering::emitEpilogue(MachineFunction &MF,
 
 
 void DayFrameLowering::determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
-                            RegScavenger *RS = nullptr) const {
+                            RegScavenger *RS) const {
+    TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);  
+//     if (hasFP(MF)) {
+//         SavedRegs.set(RAReg);
+//         SavedRegs.set(FPReg);
+//     }
+//     // Mark BP as used if function has dedicated base pointer.
+//     if (hasBP(MF))
+//         SavedRegs.set(RISCVABI::getBPReg());
 
+//   // When using cm.push/pop we must save X27 if we save X26.
+//     auto *RVFI = MF.getInfo<RISCVMachineFunctionInfo>();
+//     if (RVFI->isPushable(MF) && SavedRegs.test(RISCV::X26))
+//         SavedRegs.set(RISCV::X27);
 }
 
 

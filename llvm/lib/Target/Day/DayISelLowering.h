@@ -1,34 +1,35 @@
-#ifndef DAY_ISELLOWERING_H_
-#define DAY_ISELLOWERING_H_
+#ifndef LLVM_LIB_TARGET_DAY_DAYISELLOWERING_H
+#define LLVM_LIB_TARGET_DAY_DAYISELLOWERING_H
 
-#include "Day.h"
 #include "llvm/CodeGen/TargetLowering.h"
 
-namespace llvm{
+namespace llvm {
 class DaySubtarget;
-
-namespace DayISD{
-
-    enum NodeType{
-        FIRST_NUMBER = ISD::BUILTIN_OP_END,
-        M_LOAD,
-        M_STORE,
-        RET_GLUE,
-        Call,
-
-    };
-
+namespace DayISD {
+enum NodeType : unsigned { FIRST_NUMBER = ISD::BUILTIN_OP_END, RET_GLUE };
 }
 
-class DayTargetLowering : public TargetLowering{
-    const DaySubtarget *Subtarget;
+class DayTargetLowering : public TargetLowering {
+  const DaySubtarget *Subtarget;
+
 public:
-    DayTargetLowering(const TargetMachine &TM, const DaySubtarget &STI);
+  explicit DayTargetLowering(const TargetMachine &TM,
+                                const DaySubtarget &STI);
+
+  const char *getTargetNodeName(unsigned Opcode) const override;
+
+private:
+  SDValue LowerFormalArguments(SDValue Chain, CallingConv::ID CallConv,
+                               bool IsVarArg,
+                               const SmallVectorImpl<ISD::InputArg> &Ins,
+                               const SDLoc &DL, SelectionDAG &DAG,
+                               SmallVectorImpl<SDValue> &InVals) const override;
+
+  SDValue LowerReturn(SDValue Chain, CallingConv::ID CallConv, bool IsVarArg,
+                      const SmallVectorImpl<ISD::OutputArg> &Outs,
+                      const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
+                      SelectionDAG &DAG) const override;
 };
-
-
-}
-
-
+} // namespace llvm
 
 #endif

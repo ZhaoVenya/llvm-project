@@ -109,17 +109,17 @@ class ALU_I_JALR<string asmstr, bits<4> opcode> :
 def LoadTypeProfile : SDTypeProfile<1, 1, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>;
 
 
-def M_LOAD : SDNode<
-        "DayISD::M_LOAD",
-        LoadTypeProfile,
-        [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
-        SDNPMayLoad,SDNPMemOperand]>;
+// def M_LOAD : SDNode<
+//         "DayISD::M_LOAD",
+//         LoadTypeProfile,
+//         [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
+//         SDNPMayLoad,SDNPMemOperand]>;
 
 class ALU_L<string asmstr, bits<4> opcode, PatFrag OpNode> : 
         DayInstL<(outs GPR:$rd), (ins GPR:$rs1, simm14:$im14), 
         asmstr, "$rd, $rs1($im14)", 
         opcode>{
-    let Pattern = [(set GPR:$rd, (OpNode (M_LOAD (add GPR:$rs1, simm14:$im14))))];
+    let Pattern = [(set GPR:$rd, (OpNode (add GPR:$rs1, simm14:$im14)))];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -128,11 +128,11 @@ class ALU_L<string asmstr, bits<4> opcode, PatFrag OpNode> :
 
 def StoreTypeProfile : SDTypeProfile<0, 2, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>;
 
-def M_STORE : SDNode<
-        "DayISD::M_STORE",
-        StoreTypeProfile,
-        [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
-        SDNPMayStore,SDNPMemOperand]>;
+// def M_STORE : SDNode<
+//         "DayISD::M_STORE",
+//         StoreTypeProfile,
+//         [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
+//         SDNPMayStore,SDNPMemOperand]>;
 
 class ALU_S<string asmstr, bits<4> opcode, PatFrag OpNode> : 
         DayInstS<(outs), (ins GPR:$rs1, GPR:$rs2, simm14:$im14), 
@@ -279,9 +279,9 @@ def CALL : DayInstPseudo<(outs), (ins GPR:$rs1), [(day_call GPR:$rs1)]>, PseudoI
 def LB: ALU_L<"lb", 0b0000, sextloadi8 >;
 def LH: ALU_L<"lh", 0b0001, sextloadi16>;
 def LW: ALU_L<"lw", 0b0010, sextloadi32>;
-def LBU: ALU_L<"lbu", 0b0011, extloadi8>;
-def LHU: ALU_L<"lhu", 0b0100, extloadi16>;
-def LWU: ALU_L<"lwu", 0b0101, extloadi32>;
+def LBU: ALU_L<"lbu", 0b0011, zextloadi8>;
+def LHU: ALU_L<"lhu", 0b0100, zextloadi16>;
+def LWU: ALU_L<"lwu", 0b0101, zextloadi32>;
 
 def SB: ALU_S<"sb", 0b0000, truncstorei8>;
 def SH: ALU_S<"sh", 0b0001, truncstorei16>;

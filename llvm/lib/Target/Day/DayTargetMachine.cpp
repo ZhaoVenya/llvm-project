@@ -5,6 +5,8 @@
 #include "DayMachineFunctionInfo.h"
 #include "DayTargetObjectFile.h"
 
+#include <optional>
+
 #include "TargetInfo/DayTargetInfo.h"
 #define DEBUG_TYPE "day"
 
@@ -98,7 +100,7 @@ MachineFunctionInfo *DayTargetMachine::createMachineFunctionInfo(
     BumpPtrAllocator &Allocator, const Function &F,
     const TargetSubtargetInfo *STI) const {
   return DayMachineFunctionInfo::create<DayMachineFunctionInfo>(Allocator,
-                                                                    F, STI);
+        F, static_cast<const DaySubtarget *>(STI));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +152,7 @@ void DayPassConfig::addIRPasses() {
 }
 
 bool DayPassConfig::addInstSelector() {
-  addPass(createDayISelDag(getDayTargetMachine()));
+  addPass(createDayISelDag(getDayTargetMachine(), getOptLevel()));
   return false;
 }
 

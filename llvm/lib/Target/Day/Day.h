@@ -14,7 +14,7 @@ namespace llvm {
     class DayTargetMachine;
     class FunctionPass;
 
-    FunctionPass *createDayISelDag(DayTargetMachine &TM);
+    FunctionPass *createDayISelDag(DayTargetMachine &TM, CodeGenOptLevel OptLevel);
 
 }
 

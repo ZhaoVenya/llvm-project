@@ -39,7 +39,7 @@ DaySubtarget::DaySubtarget(const StringRef &CPU, const StringRef &TuneCPU,
       ReserveRegister(TM.getMCRegisterInfo()->getNumRegs()),
       TargetTriple(TM.getTargetTriple()), Is64Bit(is64Bit),
       InstrInfo(initializeSubtargetDependencies(CPU, TuneCPU, FS)),
-      TLInfo(TM, *this), FrameLowering(*this) {
+      TLInfo(TM, *this), FrameLowering(*this),RegInfo() {
 
 }
 

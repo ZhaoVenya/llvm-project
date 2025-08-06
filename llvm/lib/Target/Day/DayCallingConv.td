@@ -24,4 +24,8 @@ def DayCSRs : CalleeSavedRegs<(add
     S11  // s11
 )>;
 
+def RetCC_Day : CallingConv<[
+  CCIfType<[i32], CCAssignToReg<[A0, A1]>>,
+]>;
+
 

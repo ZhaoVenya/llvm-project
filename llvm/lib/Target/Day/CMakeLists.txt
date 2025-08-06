@@ -8,8 +8,7 @@ tablegen(LLVM DayGenInstrInfo.inc -gen-instr-info)
 tablegen(LLVM DayGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM DayGenSearchableTables.inc -gen-searchable-tables)
 tablegen(LLVM DayGenSubtargetInfo.inc -gen-subtarget)
-
-# tablegen(LLVM DayGenCallingConv.inc -gen-callingconv)
+tablegen(LLVM DayGenCallingConv.inc -gen-callingconv)
 
 
 
@@ -30,14 +29,17 @@ add_llvm_target(DayCodeGen
   
 
   LINK_COMPONENTS
-  Support
+  AsmPrinter
   CodeGen
   CodeGenTypes
   Core
   MC
+  SelectionDAG
+  Support
+  Target
+  TargetParser
   DayDesc
   DayInfo
-  Target
 
   ADD_TO_COMPONENT
   Day

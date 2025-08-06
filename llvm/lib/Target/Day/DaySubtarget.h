@@ -3,12 +3,14 @@
 
 
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
+#include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/TargetParser/Triple.h"
 
 #include "DayFrameLowering.h"
 #include "DayISelLowering.h"
 #include "DayInstrInfo.h"
+#include "DayRegisterInfo.h"
 #include "DayTargetMachine.h"
 #include "MCTargetDesc/DayBaseInfo.h"
 
@@ -25,32 +27,37 @@ class DaySubtarget : public DayGenSubtargetInfo{
     BitVector ReserveRegister;
     Triple TargetTriple;
     bool Is64Bit;
-    
-    DayInstrInfo InstrInfo;
-    DayTargetLowering TLInfo;
-    DayFrameLowering FrameLowering;
 
-    // DayTargetLowering TLInfo;
-    // SelectionDAGTargetInfo TSInfo;
-    // DayFrameLowering FrameLowering;
+
+    DayFrameLowering FrameLowering;
+    DayInstrInfo InstrInfo;
+    DayRegisterInfo RegInfo;
+    DayTargetLowering TLInfo;
+    SelectionDAGTargetInfo TSInfo;
 
 public:
     DaySubtarget(const StringRef &CPU, const StringRef &TuneCPU,
                     const StringRef &FS, const TargetMachine &TM, bool is64bit);
 
-    const DayInstrInfo *getInstrInfo() const override { return &InstrInfo; }
-    // const TargetFrameLowering *getFrameLowering() const override {
-    //     return &FrameLowering;
-    // }
-    // const DayRegisterInfo *getRegisterInfo() const override {
-    //     return &InstrInfo.getRegisterInfo();
-    // }
-    // const DayTargetLowering *getTargetLowering() const override {
-    //     return &TLInfo;
-    // }
-    // const SelectionDAGTargetInfo *getSelectionDAGInfo() const override {
-    //     return &TSInfo;
-    // }
+    const DayInstrInfo *getInstrInfo() const override {
+        return &InstrInfo; }
+
+    const TargetFrameLowering *getFrameLowering() const override {
+        return &FrameLowering;
+    }
+
+    const DayRegisterInfo *getRegisterInfo() const override {
+        return &RegInfo;
+    }
+
+    const DayTargetLowering *getTargetLowering() const override {
+        return &TLInfo;
+    }
+
+    const SelectionDAGTargetInfo *getSelectionDAGInfo() const override {
+        return &TSInfo;
+    }
+
     void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
     DaySubtarget &initializeSubtargetDependencies(StringRef CPU,
                                                   StringRef TuneCPU,

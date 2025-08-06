@@ -1,6 +1,7 @@
 #include "DayMCTargetDesc.h"
+#include "DayInstPrinter.h"
+#include "DayMCAsmInfo.h"
 #include "TargetInfo/DayTargetInfo.h"
-
 
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCInstrInfo.h"
@@ -41,9 +42,10 @@ static MCSubtargetInfo *createDaySubtargetInfo(const Triple &TT,
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeDayTargetMC() {
+    TargetRegistry::RegisterAsmPrinter(getTheDayTarget(), createDayMCAsmInfo);
     TargetRegistry::RegisterMCInstrInfo(getTheDayTarget(), createDayMCInstrInfo);
     TargetRegistry::RegisterMCRegInfo(getTheDayTarget(), createDayMCRegisterInfo);
     TargetRegistry::RegisterMCSubtargetInfo(getTheDayTarget(), createDaySubtargetInfo);
+    TargetRegistry::RegisterMCInstrPrinter(getTheDayTarget(), createDayMCInstPrinter);
 }
-
 

@@ -6,6 +6,9 @@
 
 using namespace llvm;
 
+#include "DayGenRegisterInfo.inc"
+
+
 static const MCPhysReg ArgFPRs[] = {
   Day::F00, Day::F01, Day::F02, Day::F03, Day::F04, Day::F05, Day::F06, Day::F07,
   Day::F08, Day::F09, Day::F10, Day::F11, Day::F12, Day::F13, Day::F14, Day::F15,

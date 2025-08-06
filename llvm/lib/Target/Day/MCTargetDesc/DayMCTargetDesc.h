@@ -13,12 +13,16 @@
 
 
 // 在 Day.h 或 DayMCTargetDesc.h 中
-namespace Day {
+namespace llvm{
+  namespace Day {
   enum {
     NoRegAltName = 0,
     ABIRegAltName = 1
   };
 }
+
+}
+
 
 
 

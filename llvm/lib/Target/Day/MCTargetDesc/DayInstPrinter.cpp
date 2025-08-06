@@ -23,6 +23,19 @@ void DayInstPrinter::printOperand(const MCInst *MI, unsigned OpNo,
 
 }
 
+void DayInstPrinter::printBranchOperand(const MCInst *MI,
+                                          unsigned OpNo,
+                                          const MCSubtargetInfo &STI,
+                                          raw_ostream &O) {
+
+}
+
+
+void printCustomAliasOperand(const MCInst *MI, uint64_t Address,
+                               unsigned OpIdx, unsigned PrintMethodIdx,
+                               const MCSubtargetInfo &STI, raw_ostream &O){
+
+}
 // const char *DayInstPrinter::getRegisterName(MCRegister Reg) {
 //   return getRegisterName(Reg, Day::NoRegAltName);
 // }

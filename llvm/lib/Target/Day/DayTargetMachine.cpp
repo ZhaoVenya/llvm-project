@@ -34,7 +34,7 @@ static cl::opt<bool>
 static std::string computeDataLayout(const Triple &T) {
   // Sparc is typically big endian, but some are little.
     std::string Ret;
-    Ret = "e-m:e-p:32:32-i64:64-n32-S128";// 这个就是Day架构的Data Layout
+    Ret = "e-m:e-p:32:32-i32:32-n32-S32";// 这个就是Day架构的Data Layout
 
     return Ret;
 }

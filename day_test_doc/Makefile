@@ -49,7 +49,7 @@ $(OBJ_DIR)/%.bc: $(SRC_DIR)/%.c | $(OBJ_DIR)
 		$(CXX) -I$(INC_DIR) -emit-llvm -c $< -o $@
 
 $(OBJ_DIR)/%.ll: $(SRC_DIR)/%.c | $(OBJ_DIR)
-		$(CXX) -target riscv32-unknown-elf -march=rv32imafdc -mabi=ilp32d -O3 -S -emit-llvm $< -o $@ #
+		$(CXX) -target day-unknown-elf -march=rv32imafdc -mabi=ilp32d -O3 -S -emit-llvm $< -o $@ #
 
 $(DAG_DIR)/%.svg: $(OBJ_DIR)/%.ll | $(DAG_DIR)
 		$(LLC) -view-isel-dags $< -o /tmp/dag.$*.dot

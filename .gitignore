@@ -58,6 +58,7 @@ autoconf/autom4te.cache
 #==============================================================================#
 # VS2017 and VSCode config files.
 .vscode
+!.vscode/launch.json
 .vs
 #zed config files
 .zed

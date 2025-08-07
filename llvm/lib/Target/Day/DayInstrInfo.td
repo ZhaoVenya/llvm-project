@@ -340,9 +340,9 @@ def RET_PSEUDO : DayInstPseudo<(outs), (ins)> {
     // let Pattern = [(ret)]; 
 }
 // 假设你需要异常捕获返回伪指令
-// def CATCHRET_PSEUDO : DayInstPseudo<(outs), (ins)> {
-//     let AsmString = "catchret";
-// }
+def CATCHRET_PSEUDO : DayInstPseudo<(outs), (ins)> {
+    let AsmString = "catchret";
+}
 
 //////////////////////////////////////////////////////////////
 // ... (之前的 DayInstCommon 和 DayInst 定义)

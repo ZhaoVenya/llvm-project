@@ -20,14 +20,37 @@ DayAsmPrinter::DayAsmPrinter(TargetMachine &TM,
     : AsmPrinter(TM, std::move(Streamer)), MCInstLowering(OutContext, *this) {}
 
 void DayAsmPrinter::emitInstruction(const MachineInstr *MI) {
-  if (emitPseudoExpansionLowering(*OutStreamer, MI)) {
-    return;
-  }
+  // if (emitPseudoExpansionLowering(*OutStreamer, MI)) {
+  //   return;
+  // }
   MCInst TmpInst;
   MCInstLowering.Lower(MI, TmpInst);
   EmitToStreamer(*OutStreamer, TmpInst);
 }
 
+
+static MCOperand lowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym,
+                                    const AsmPrinter &AP) {
+  MCContext &Ctx = AP.OutContext;
+  unsigned Kind;
+
+  switch (MO.getTargetFlags()) {
+  default:
+    llvm_unreachable("Unknown target flag on GV operand");
+  case 0:
+    Kind = 0;
+    break;
+  }
+
+  const MCExpr *ME =
+      MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, Ctx);
+
+  if (!MO.isJTI() && !MO.isMBB() && MO.getOffset())
+    ME = MCBinaryExpr::createAdd(
+        ME, MCConstantExpr::create(MO.getOffset(), Ctx), Ctx);
+
+  return MCOperand::createExpr(ME);
+}
 
 bool DayAsmPrinter::lowerOperand(const MachineOperand &MO,
                                    MCOperand &MCOp) const {
@@ -46,9 +69,9 @@ bool DayAsmPrinter::lowerOperand(const MachineOperand &MO,
   case MachineOperand::MO_Immediate:
     MCOp = MCOperand::createImm(MO.getImm());
     break;
-  // case MachineOperand::MO_MachineBasicBlock:
-  //   MCOp = lowerSymbolOperand(MO, MO.getMBB()->getSymbol(), *this);
-  //   break;
+  case MachineOperand::MO_MachineBasicBlock:
+    MCOp = lowerSymbolOperand(MO, MO.getMBB()->getSymbol(), *this);
+    break;
   // case MachineOperand::MO_GlobalAddress:
   //   MCOp = lowerSymbolOperand(MO, getSymbolPreferLocal(*MO.getGlobal()), *this);
   //   break;

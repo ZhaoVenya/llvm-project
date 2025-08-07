@@ -20,7 +20,7 @@ public:
   bool lowerOperand(const MachineOperand &MO, MCOperand &MCOp) const;
 
 private:
-  bool emitPseudoExpansionLowering(MCStreamer &OutStreamer, const MachineInstr *MI);
+  // bool emitPseudoExpansionLowering(MCStreamer &OutStreamer, const MachineInstr *MI);
   bool lowerPseudoInstExpansion(const MachineInstr *MI, MCInst &Inst);
 
 

@@ -63,7 +63,7 @@ const char *DayTargetLowering::getTargetNodeName(unsigned Opcode) const {
   case DayISD::RET_GLUE:
     return "DayISD::RET_GLUE";
   case DayISD::Call:
-    return "DayISD::RET_GLUE";
+    return "DayISD::Call";
   default:
     return nullptr;
   }

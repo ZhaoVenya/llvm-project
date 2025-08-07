@@ -6,7 +6,7 @@
 namespace llvm {
 class DaySubtarget;
 namespace DayISD {
-enum NodeType : unsigned { FIRST_NUMBER = ISD::BUILTIN_OP_END, RET_GLUE };
+enum NodeType : unsigned { FIRST_NUMBER = ISD::BUILTIN_OP_END, RET_GLUE, Call};
 }
 
 class DayTargetLowering : public TargetLowering {

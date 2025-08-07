@@ -61,7 +61,9 @@ DayTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
 const char *DayTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch ((DayISD::NodeType)Opcode) {
   case DayISD::RET_GLUE:
-    return "SXGPUISD::RET_GLUE";
+    return "DayISD::RET_GLUE";
+  case DayISD::Call:
+    return "DayISD::RET_GLUE";
   default:
     return nullptr;
   }

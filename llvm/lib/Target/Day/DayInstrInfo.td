@@ -275,6 +275,7 @@ def CALL : DayInstPseudo<(outs), (ins GPR:$rs1), [(day_call GPR:$rs1)]>, PseudoI
     let mayStore = 0;
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////
 def LB: ALU_L<"lb", 0b0000, sextloadi8 >;
 def LH: ALU_L<"lh", 0b0001, sextloadi16>;
@@ -331,16 +332,17 @@ def ADJCALLSTACKDOWN : DayInstPseudo<(outs), (ins simm32:$amount, simm32:$align)
 def ADJCALLSTACKUP : DayInstPseudo<(outs), (ins simm32:$amount, simm32:$align)> {
     let AsmString = "adjcallstackup\t$amount, $align";
 }
+
 // 假设你需要通用的返回伪指令
-def RET_PSEUDO : DayInstPseudo<(outs), (ins)> {
-    let AsmString = "ret";
-    // 如果这是通用的返回，它可能会在指令选择阶段匹配 return 指令
-    // let Pattern = [(ret)]; 
-}
+// def RET_PSEUDO : DayInstPseudo<(outs), (ins)> {
+//     let AsmString = "ret";
+//     // 如果这是通用的返回，它可能会在指令选择阶段匹配 return 指令
+//     let Pattern = [(ret)]; 
+// }
 // 假设你需要异常捕获返回伪指令
-def CATCHRET_PSEUDO : DayInstPseudo<(outs), (ins)> {
-    let AsmString = "catchret";
-}
+// def CATCHRET_PSEUDO : DayInstPseudo<(outs), (ins)> {
+//     let AsmString = "catchret";
+// }
 
 //////////////////////////////////////////////////////////////
 // ... (之前的 DayInstCommon 和 DayInst 定义)
@@ -364,3 +366,25 @@ def MOVFR : DayInstCBase<(outs GPR:$rd), (ins GPR:$rs1), "movfr">{
 def MOVFF : DayInstCBase<(outs GPR:$rd), (ins GPR:$rs1), "movfr">{
   let Inst{7-4} = 0b0011;
 }
+
+
+// class PseudoInst<dag outs, dag ins, list<dag> pattern, string asmstr = "">
+//     : RV32IInst<outs, ins, asmstr, pattern> {
+//   let isPseudo = 1;
+//   let isCodeGenOnly = 1;
+// }
+
+
+// def retglue : SDNode<"RISCVNISD::RET_GLUE", SDTNone,
+//                            [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+
+
+// let isBarrier = 1, isReturn = 1, isTerminator = 1 in {
+//   def PseudoRET : PseudoInst<
+//               (outs),
+//               (ins),
+//               [(retglue)]>,
+//               PseudoInstExpansion<(JALR X0, X1, 0)>;
+// }
+
+

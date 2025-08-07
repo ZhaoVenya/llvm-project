@@ -314,7 +314,7 @@ class DayInstPseudoBase<dag outs, dag ins, string asmstr, string argstr="", list
 
 
 class DayInstPseudo<dag outs, dag ins, list<dag> pattern=[], string asmstr = "">
-    : DayInstPseudoBase<outs, ins, asmstr, "">;
+    : DayInstPseudoBase<outs, ins, asmstr, "", pattern=pattern>;
 
 /////////////////////////////////////////////////////////////////////////////////
 // 拷贝指令

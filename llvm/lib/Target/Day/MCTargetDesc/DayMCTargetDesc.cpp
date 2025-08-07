@@ -24,6 +24,13 @@ using namespace llvm;
 #include "DayGenRegisterInfo.inc"
 
 
+static MCAsmInfo *createDayMCAsmInfo(const MCRegisterInfo &MRI,
+                                        const Triple &TT,
+                                        const MCTargetOptions &Options) {
+  MCAsmInfo *MAI = new DayMCAsmInfo(TT);
+  return MAI;
+}
+
 static MCInstrInfo *createDayMCInstrInfo() {
   MCInstrInfo *X = new MCInstrInfo();
   InitDayMCInstrInfo(X);
@@ -41,11 +48,22 @@ static MCSubtargetInfo *createDaySubtargetInfo(const Triple &TT,
     return createDayMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/CPU, FS);
 }
 
+static MCInstPrinter *createDayMCInstPrinter(const Triple &T,
+                                                unsigned SyntaxVariant,
+                                                const MCAsmInfo &MAI,
+                                                const MCInstrInfo &MII,
+                                                const MCRegisterInfo &MRI) {
+  return new DayInstPrinter(MAI, MII, MRI);
+}
+
+
+
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeDayTargetMC() {
-    TargetRegistry::RegisterAsmPrinter(getTheDayTarget(), createDayMCAsmInfo);
+    TargetRegistry::RegisterMCAsmInfo(getTheDayTarget(), createDayMCAsmInfo);
     TargetRegistry::RegisterMCInstrInfo(getTheDayTarget(), createDayMCInstrInfo);
     TargetRegistry::RegisterMCRegInfo(getTheDayTarget(), createDayMCRegisterInfo);
     TargetRegistry::RegisterMCSubtargetInfo(getTheDayTarget(), createDaySubtargetInfo);
-    TargetRegistry::RegisterMCInstrPrinter(getTheDayTarget(), createDayMCInstPrinter);
+    TargetRegistry::RegisterMCInstPrinter(getTheDayTarget(), createDayMCInstPrinter);
 }
 

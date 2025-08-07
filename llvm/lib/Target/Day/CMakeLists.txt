@@ -10,6 +10,7 @@ tablegen(LLVM DayGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM DayGenSearchableTables.inc -gen-searchable-tables)
 tablegen(LLVM DayGenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM DayGenCallingConv.inc -gen-callingconv)
+tablegen(LLVM DayGenMCPseudoLowering.inc -gen-pseudo-lowering)
 
 
 

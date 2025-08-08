@@ -286,7 +286,7 @@ def LWU: ALU_L<"lwu", 0b0101, zextloadi32>;
 
 def SB: ALU_S<"sb", 0b0000, truncstorei8>;
 def SH: ALU_S<"sh", 0b0001, truncstorei16>;
-def SW: ALU_S<"sw", 0b0010, truncstorei32>;
+def SW: ALU_S<"sw", 0b0010, store>;
 
 def BEQ: ALU_B<"beq",   0b0000>;
 def BNE: ALU_B<"bne",   0b0001>;

@@ -68,3 +68,13 @@ const char *DayTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return nullptr;
   }
 }
+
+
+bool DayTargetLowering::isLegalICmpImmediate(int64_t Imm) const {
+  return isInt<12>(Imm);
+}
+
+bool DayTargetLowering::isLegalAddImmediate(int64_t Imm) const {
+  return isInt<12>(Imm);
+}
+

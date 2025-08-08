@@ -17,6 +17,9 @@ public:
                                 const DaySubtarget &STI);
 
   const char *getTargetNodeName(unsigned Opcode) const override;
+  
+  bool isLegalICmpImmediate(int64_t Imm) const override;
+  bool isLegalAddImmediate(int64_t Imm) const override;
 
 private:
   SDValue LowerFormalArguments(SDValue Chain, CallingConv::ID CallConv,

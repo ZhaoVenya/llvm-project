@@ -19,13 +19,15 @@ void DaySubtarget::anchor() { }
 
 DaySubtarget &DaySubtarget::initializeSubtargetDependencies(
     StringRef CPU, StringRef TuneCPU, StringRef FS) {
-  // Determine default and user specified characteristics
-  std::string CPUName = std::string(CPU);
+  
+  if (CPU.empty() || CPU == "generic")
+    CPU = Is64Bit ? "generic" : "generic";
 
-  std::string TuneCPUName = std::string(TuneCPU);
+  if (TuneCPU.empty())
+    TuneCPU = CPU;
 
   // Parse features string.
-  ParseSubtargetFeatures(CPUName, TuneCPUName, FS);
+  ParseSubtargetFeatures(CPU, TuneCPU, FS);
 
   return *this;
 }

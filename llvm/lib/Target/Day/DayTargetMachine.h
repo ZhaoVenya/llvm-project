@@ -16,7 +16,7 @@ class DayTargetMachine : public CodeGenTargetMachineImpl {
     std::unique_ptr<TargetLoweringObjectFile> TLOF;
     bool is64Bit;
     // bool isJIT;
-    // mutable StringMap<std::unique_ptr<DaySubtarget>> SubtargetMap;
+    mutable StringMap<std::unique_ptr<DaySubtarget>> SubtargetMap;
 
 public:
   DayTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
@@ -26,7 +26,7 @@ public:
                      bool JIT, bool is64bit);
   ~DayTargetMachine() override;
 
-  // const DaySubtarget *getSubtargetImpl(const Function &F) const override;
+  const DaySubtarget *getSubtargetImpl(const Function &F) const override;
 
   // Pass Pipeline Configuration
   TargetPassConfig *createPassConfig(PassManagerBase &PM) override;

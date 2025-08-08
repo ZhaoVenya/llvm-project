@@ -11,7 +11,7 @@
 #include "DayISelLowering.h"
 #include "DayInstrInfo.h"
 #include "DayRegisterInfo.h"
-#include "DayTargetMachine.h"
+// #include "DayTargetMachine.h"
 #include "MCTargetDesc/DayBaseInfo.h"
 
 #define GET_SUBTARGETINFO_HEADER

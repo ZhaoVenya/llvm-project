@@ -20,6 +20,7 @@ public:
   
   bool isLegalICmpImmediate(int64_t Imm) const override;
   bool isLegalAddImmediate(int64_t Imm) const override;
+  SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
 
 private:
   SDValue LowerFormalArguments(SDValue Chain, CallingConv::ID CallConv,

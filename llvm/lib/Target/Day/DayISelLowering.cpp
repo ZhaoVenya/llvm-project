@@ -2,6 +2,14 @@
 #include "MCTargetDesc/DayMCTargetDesc.h"
 #include "DaySubtarget.h"
 #include "llvm/CodeGen/CallingConvLower.h"
+// #include "llvm/CodeGen/SelectionDAGAddressAnalysis.h"
+// #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
+// #include "llvm/CodeGen/ValueTypes.h"
+// #include "llvm/CodeGen/MachineFrameInfo.h"
+// #include "llvm/CodeGen/MachineFunction.h"
+// #include "llvm/CodeGen/MachineInstrBuilder.h"
+// #include "llvm/CodeGen/MachineJumpTableInfo.h"
+// #include "llvm/CodeGen/MachineRegisterInfo.h"
 
 using namespace llvm;
 
@@ -78,3 +86,27 @@ bool DayTargetLowering::isLegalAddImmediate(int64_t Imm) const {
   return isInt<14>(Imm);
 }
 
+
+
+static SDValue lowerConstant(SDValue Op, SelectionDAG &DAG){
+  assert(Op.getValueType() == MVT::i32 && "Unexpected VT");
+
+  int32_t Imm = cast<ConstantSDNode>(Op)->getSExtValue();
+  
+  if(isInt<32>(Imm))
+    return Op;
+
+}
+
+
+SDValue DayTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
+  
+  switch(Op.getOpcode()){
+    default:
+      report_fatal_error("unimplemented operand");
+    
+    case ISD::Constant:
+      return lowerConstant(Op,DAG);
+
+  }
+}

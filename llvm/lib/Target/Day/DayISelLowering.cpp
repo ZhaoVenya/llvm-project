@@ -109,4 +109,7 @@ SDValue DayTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
       return lowerConstant(Op,DAG);
 
   }
+
+  return SDValue();
+
 }

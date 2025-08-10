@@ -367,30 +367,10 @@ def MOVFF : DayInstCBase<(outs GPR:$rd), (ins GPR:$rs1), "movfr">{
   let Inst{7-4} = 0b0011;
 }
 
-// def addr : ValueType<32,12>;
-
-// def ADDR : ComplexPattern<iPTR, 2, "SelectADDR", [], []>;
-
-// def LoadImmediate : Pat<(i32 imm:$imm), (ADDI GPR:$rd, ZERO, imm:$imm)>;
-
-// def StoreFromReg : Pat<(store GPR:$src, ADDR:$dst), (SW GPR:$src, ADDR:$dst)>;
-// class PseudoInst<dag outs, dag ins, list<dag> pattern, string asmstr = "">
-//     : RV32IInst<outs, ins, asmstr, pattern> {
-//   let isPseudo = 1;
-//   let isCodeGenOnly = 1;
-// }
 
 
-// def retglue : SDNode<"RISCVNISD::RET_GLUE", SDTNone,
-//                            [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
+def LoadImm : Pat<(i32 (simm14:$im14)), (ADDI ZERO, simm14:$im14)>;
 
-// let isBarrier = 1, isReturn = 1, isTerminator = 1 in {
-//   def PseudoRET : PseudoInst<
-//               (outs),
-//               (ins),
-//               [(retglue)]>,
-//               PseudoInstExpansion<(JALR X0, X1, 0)>;
-// }
 
 

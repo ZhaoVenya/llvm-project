@@ -6,8 +6,13 @@
 
 namespace llvm {
 
-/*
+typedef bool DayCCAssignFn(unsigned ValNo, MVT ValVT, MVT LocVT,
+                             CCValAssign::LocInfo LocInfo,
+                             ISD::ArgFlagsTy ArgFlags, CCState &State,
+                             bool IsFixed, bool IsRet, Type *OrigTy);
 
+
+/*
  ValNo: 值编号。它是一个从 0 开始递增的整数，用于标识当前正在处理的是第几个参数或返回值。
  ValTV: 值虚拟类型 (Value Virtual Type)。代表参数或返回值的原始 LLVM 类型，例如 MVT::i32 (32位整数) 或 MVT::f64 (64位浮点数)。
  LocVT: 分配位置的虚拟类型,这是编译器实际用于分配的类型。

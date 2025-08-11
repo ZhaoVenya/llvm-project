@@ -1,6 +1,9 @@
 #ifndef LLVM_LIB_TARGET_DAY_DAYISELLOWERING_H
 #define LLVM_LIB_TARGET_DAY_DAYISELLOWERING_H
 
+#include "Day.h"
+#include "DayCallingConv.h"
+
 #include "llvm/CodeGen/TargetLowering.h"
 
 namespace llvm {
@@ -33,6 +36,12 @@ private:
                       const SmallVectorImpl<ISD::OutputArg> &Outs,
                       const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
                       SelectionDAG &DAG) const override;
+  
+  void analyzeOutputArgs(MachineFunction &MF, CCState &CCInfo,
+                         const SmallVectorImpl<ISD::OutputArg> &Outs,
+                         bool IsRet, CallLoweringInfo *CLI,
+                         DayCCAssignFn Fn) const;
+
 };
 } // namespace llvm
 

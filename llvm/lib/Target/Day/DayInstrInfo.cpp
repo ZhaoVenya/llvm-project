@@ -11,6 +11,7 @@
 
 using namespace llvm;
 
+// #define GET_INSTRINFO_ENUM
 #define GET_INSTRINFO_CTOR_DTOR
 #include "DayGenInstrInfo.inc"
 
@@ -28,7 +29,7 @@ static cl::opt<unsigned>
 void DayInstrInfo::anchor() {}
 
 DayInstrInfo::DayInstrInfo(DaySubtarget &ST)
-    : DayGenInstrInfo(Day::ADJCALLSTACKDOWN, Day::ADJCALLSTACKUP),STI(ST),RI(0,ST){
+    : DayGenInstrInfo(Day::ADJCALLSTACKDOWN, Day::ADJCALLSTACKUP),RI(0,ST),STI(ST){
       
 }
 

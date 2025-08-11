@@ -334,11 +334,11 @@ def ADJCALLSTACKUP : DayInstPseudo<(outs), (ins simm32:$amount, simm32:$align)> 
 }
 
 // 假设你需要通用的返回伪指令
-def RET_PSEUDO : DayInstPseudo<(outs), (ins)> {
-    let AsmString = "ret";
-    // 如果这是通用的返回，它可能会在指令选择阶段匹配 return 指令
-    // let Pattern = [(ret)]; 
-}
+// def RET_PSEUDO : DayInstPseudo<(outs), (ins)> {
+//     let AsmString = "ret";
+//     // 如果这是通用的返回，它可能会在指令选择阶段匹配 return 指令
+//     // let Pattern = [(ret)]; 
+// }
 // 假设你需要异常捕获返回伪指令
 def CATCHRET_PSEUDO : DayInstPseudo<(outs), (ins)> {
     let AsmString = "catchret";

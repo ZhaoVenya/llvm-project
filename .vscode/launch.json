@@ -10,6 +10,7 @@
                     "-march=day",
                     "-O0",
                     "-filetype=asm",
+                    // "-print-before=asm-printer",
                     "${workspaceFolder}/day_test_doc/src/bbb.ll",
                     "-o",
                     "-",

@@ -2,4 +2,4 @@
 
 using namespace llvm;
 
-DayMCAsmInfo::DayMCAsmInfo(const Triple &TT) { CommentString = "//"; }
+DayMCAsmInfo::DayMCAsmInfo(const Triple &TT) { CommentString = ";"; }

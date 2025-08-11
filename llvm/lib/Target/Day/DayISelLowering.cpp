@@ -27,6 +27,29 @@ DayTargetLowering::DayTargetLowering(const TargetMachine &TM,
   computeRegisterProperties(ST.getRegisterInfo());
 }
 
+
+
+void DayTargetLowering::analyzeOutputArgs(
+    MachineFunction &MF, CCState &CCInfo,
+    const SmallVectorImpl<ISD::OutputArg> &Outs, bool IsRet,
+    CallLoweringInfo *CLI, DayCCAssignFn Fn) const {
+  unsigned NumArgs = Outs.size();
+
+  for (unsigned i = 0; i != NumArgs; i++) {
+    MVT ArgVT = Outs[i].VT;
+    ISD::ArgFlagsTy ArgFlags = Outs[i].Flags;
+    Type *OrigTy = CLI ? CLI->getArgs()[Outs[i].OrigArgIndex].Ty : nullptr;
+
+    if (Fn(i, ArgVT, ArgVT, CCValAssign::Full, ArgFlags, CCInfo,
+           Outs[i].IsFixed, IsRet, OrigTy)) {
+      LLVM_DEBUG(dbgs() << "OutputArg #" << i << " has unhandled type "
+                        << ArgVT << "\n");
+      llvm_unreachable(nullptr);
+    }
+  }
+}
+
+
 SDValue DayTargetLowering::LowerFormalArguments(
     SDValue Chain, CallingConv::ID CallConv, bool IsVarArg,
     const SmallVectorImpl<ISD::InputArg> &Ins, const SDLoc &DL,
@@ -44,7 +67,11 @@ DayTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
 
   CCState CCInfo(CallConv, IsVarArg, DAG.getMachineFunction(), RVLocs,
                  *DAG.getContext());
-  CCInfo.AnalyzeReturn(Outs, RetCC_Day);
+
+  analyzeOutputArgs(DAG.getMachineFunction(), CCInfo, Outs, /*IsRet=*/true,
+                    nullptr, CC_Day);
+
+  // CCInfo.AnalyzeReturn(Outs, RetCC_Day);
 
   SDValue Glue;
   SmallVector<SDValue, 4> RetOps(1, Chain);

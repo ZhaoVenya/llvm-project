@@ -20,7 +20,7 @@ public:
   void printOperand(const MCInst *MI, unsigned OpNo, const MCSubtargetInfo &STI,
                     raw_ostream &O, const char *Modifier = nullptr);
   
-  bool DayInstPrinter::applyTargetSpecificCLOption(StringRef Opt);
+  bool applyTargetSpecificCLOption(StringRef Opt) override;
   
   void printBranchOperand(const MCInst *MI, unsigned OpNo,
                           const MCSubtargetInfo &STI, raw_ostream &O);

@@ -14,6 +14,20 @@ using namespace llvm;
 
 static bool ArchRegNames;
 
+bool DayInstPrinter::applyTargetSpecificCLOption(StringRef Opt) {
+  if (Opt == "no-aliases") {
+    PrintAliases = false;
+    return true;
+  }
+  if (Opt == "numeric") {
+    ArchRegNames = true;
+    return true;
+  }
+
+  return false;
+}
+
+
 void DayInstPrinter::printInst(const MCInst *MI, uint64_t Address,
                                   StringRef Annot, const MCSubtargetInfo &STI,
                                   raw_ostream &O) {
@@ -65,8 +79,8 @@ void printCustomAliasOperand(const MCInst *MI, uint64_t Address,
 }
 
 
-const char *DayInstPrinter::getRegisterName(MCRegister Reg) {
-  return getRegisterName(Reg, ArchRegNames ? Day::NoRegAltName
-                                           : Day::ABIRegAltName);
-}
+// const char *DayInstPrinter::getRegisterName(MCRegister Reg) {
+//   return getRegisterName(Reg, ArchRegNames ? Day::NoRegAltName
+//                                            : Day::ABIRegAltName);
+// }
 

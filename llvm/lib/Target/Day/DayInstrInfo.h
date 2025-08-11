@@ -6,6 +6,7 @@
 #include "DayRegisterInfo.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
 
+// #define GET_INSTRINFO_ENUM
 #define GET_INSTRINFO_HEADER
 #include "DayGenInstrInfo.inc"
 

@@ -15,7 +15,12 @@ public:
   void printInst(const MCInst *MI, uint64_t Address, StringRef Annot,
                  const MCSubtargetInfo &STI, raw_ostream &O) override;
 
-  void printOperand(const MCInst *MI, unsigned OpNo, const MCSubtargetInfo &STI,raw_ostream &O);
+  void printRegName(raw_ostream &O, MCRegister Reg) override;
+
+  void printOperand(const MCInst *MI, unsigned OpNo, const MCSubtargetInfo &STI,
+                    raw_ostream &O, const char *Modifier = nullptr);
+  
+  bool DayInstPrinter::applyTargetSpecificCLOption(StringRef Opt);
   
   void printBranchOperand(const MCInst *MI, unsigned OpNo,
                           const MCSubtargetInfo &STI, raw_ostream &O);

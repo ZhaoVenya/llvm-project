@@ -237,7 +237,7 @@ def MPANF: ALU_R4_F<"mpanf", 0b0100>;
 def MNAPF: ALU_R4_F<"mnapf", 0b0101>;
 def MNANF: ALU_R4_F<"mnanf", 0b0110>;
 
-def ADDI: ALU_I<"addi", 0b0000, add>;
+def ADDI: ALU_I<"addi", 0b1011, add>;
 def SUBI: ALU_I<"subi", 0b0001, sub>;
 def MULI: ALU_I<"muli", 0b0010, mul>;
 def DIVI: ALU_I<"divi", 0b0011, sdiv>;

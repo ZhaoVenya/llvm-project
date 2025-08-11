@@ -27,17 +27,17 @@ class DaySubtarget : public DayGenSubtargetInfo{
     BitVector ReserveRegister;
     Triple TargetTriple;
     bool Is64Bit;
-
-
-    DayFrameLowering FrameLowering;
+    
     DayInstrInfo InstrInfo;
-    DayRegisterInfo RegInfo;
+    DayFrameLowering FrameLowering;
     DayTargetLowering TLInfo;
+    DayRegisterInfo RegInfo;
     SelectionDAGTargetInfo TSInfo;
 
 public:
     DaySubtarget(const StringRef &CPU, const StringRef &TuneCPU,
                     const StringRef &FS, const TargetMachine &TM, bool is64bit);
+    ~DaySubtarget() override;
 
     const DayInstrInfo *getInstrInfo() const override {
         return &InstrInfo; }

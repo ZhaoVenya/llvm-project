@@ -17,7 +17,8 @@ struct DayRegisterInfo : public DayGenRegisterInfo {
   
   const DaySubtarget &STI;
 
-  DayRegisterInfo();
+public:
+  DayRegisterInfo(unsigned HwMode, const DaySubtarget &ST);
 
   /// Code Generation virtual methods...
   const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;

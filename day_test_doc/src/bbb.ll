@@ -6,8 +6,6 @@ target triple = "day-unknown-unknown-elf"
 ; Function Attrs: noinline nounwind optnone
 define dso_local i32 @main() #0 {
 entry:
-  %retval = alloca i32, align 4
-  store i32 0, ptr %retval, align 4
   ret i32 10
 }
 

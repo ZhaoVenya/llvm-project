@@ -21,7 +21,7 @@ using namespace llvm;
 DayFrameLowering::DayFrameLowering(const DaySubtarget &ST)
     : TargetFrameLowering(TargetFrameLowering::StackGrowsDown,
                           Align(8), 0, Align(8),
-                          /*StackRealignable=*/false),STI(STI) {
+                          /*StackRealignable=*/false),STI(ST) {
 
 }
 

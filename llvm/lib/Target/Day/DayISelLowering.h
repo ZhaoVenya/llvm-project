@@ -10,11 +10,11 @@ enum NodeType : unsigned { FIRST_NUMBER = ISD::BUILTIN_OP_END, RET_GLUE, Call};
 }
 
 class DayTargetLowering : public TargetLowering {
-  const DaySubtarget *Subtarget;
+  const DaySubtarget *STI;
 
 public:
   explicit DayTargetLowering(const TargetMachine &TM,
-                                const DaySubtarget &STI);
+                                const DaySubtarget &ST);
 
   const char *getTargetNodeName(unsigned Opcode) const override;
   

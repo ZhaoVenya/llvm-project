@@ -30,7 +30,7 @@ class DayInstrInfo : public DayGenInstrInfo {
   virtual void anchor();
 
 protected:
-  const DaySubtarget &Subtarget;
+  const DaySubtarget &STI;
 public:
   explicit DayInstrInfo(DaySubtarget &ST);
 

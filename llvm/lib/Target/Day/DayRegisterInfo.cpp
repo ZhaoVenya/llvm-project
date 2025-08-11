@@ -2,6 +2,7 @@
 #include "Day.h"
 #include "DaySubtarget.h"
 
+#include "llvm/BinaryFormat/Dwarf.h"
 #include "MCTargetDesc/DayMCTargetDesc.h"
 
 #include "llvm/CodeGen/MachineFrameInfo.h"
@@ -21,7 +22,8 @@ ReserveAppRegisters("day-reserve-app-registers", cl::Hidden, cl::init(false),
 
 
 // DayGenRegisterInfo的入口参数是RA,
-DayRegisterInfo::DayRegisterInfo() : DayGenRegisterInfo(Day::RA),STI(STI) {
+DayRegisterInfo::DayRegisterInfo(unsigned HwCode, const DaySubtarget &ST)
+              :DayGenRegisterInfo(Day::RA,0,0,HwCode),STI(ST){
   
 }
 

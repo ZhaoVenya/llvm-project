@@ -18,13 +18,13 @@ using namespace llvm;
 #include "DayGenCallingConv.inc"
 
 DayTargetLowering::DayTargetLowering(const TargetMachine &TM,
-                                           const DaySubtarget &STI)
-    : TargetLowering(TM), Subtarget(&STI) {
+                                           const DaySubtarget &ST)
+    : TargetLowering(TM), STI(&ST) {
   // Set up the register classes.
   addRegisterClass(MVT::i32, &Day::GPRRegClass);
 
   // Compute derived properties from the register classes
-  computeRegisterProperties(STI.getRegisterInfo());
+  computeRegisterProperties(ST.getRegisterInfo());
 }
 
 SDValue DayTargetLowering::LowerFormalArguments(

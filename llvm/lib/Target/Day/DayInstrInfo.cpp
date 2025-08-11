@@ -28,8 +28,9 @@ static cl::opt<unsigned>
 void DayInstrInfo::anchor() {}
 
 DayInstrInfo::DayInstrInfo(DaySubtarget &ST)
-    : DayGenInstrInfo(Day::ADJCALLSTACKDOWN, Day::ADJCALLSTACKUP), RI(),
-      Subtarget(ST) {}
+    : DayGenInstrInfo(Day::ADJCALLSTACKDOWN, Day::ADJCALLSTACKUP),STI(ST),RI(0,ST){
+      
+}
 
 
 /*************************************************************
@@ -203,7 +204,7 @@ void DayInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
                                  MCRegister SrcReg, bool KillSrc,
                                  bool RenamableDest, bool RenamableSrc) const {
 
-  const TargetRegisterInfo *TRI = Subtarget.getRegisterInfo();
+  const TargetRegisterInfo *TRI = STI.getRegisterInfo();
 
     if (Day::GPRRegClass.contains(DestReg, SrcReg)) {
         BuildMI(MBB, I, DL, get(Day::MOVRR), DestReg)

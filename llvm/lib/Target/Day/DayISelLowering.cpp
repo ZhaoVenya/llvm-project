@@ -1,6 +1,7 @@
 #include "DayISelLowering.h"
 #include "MCTargetDesc/DayMCTargetDesc.h"
 #include "DaySubtarget.h"
+#include "DayMachineFunctionInfo.h"
 #include "llvm/CodeGen/CallingConvLower.h"
 // #include "llvm/CodeGen/SelectionDAGAddressAnalysis.h"
 // #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
@@ -57,41 +58,89 @@ SDValue DayTargetLowering::LowerFormalArguments(
   return Chain;
 }
 
+
+
 SDValue
 DayTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
-                                  bool IsVarArg,
-                                  const SmallVectorImpl<ISD::OutputArg> &Outs,
-                                  const SmallVectorImpl<SDValue> &OutVals,
-                                  const SDLoc &DL, SelectionDAG &DAG) const {
+                                 bool IsVarArg,
+                                 const SmallVectorImpl<ISD::OutputArg> &Outs,
+                                 const SmallVectorImpl<SDValue> &OutVals,
+                                 const SDLoc &DL, SelectionDAG &DAG) const {
+  MachineFunction &MF = DAG.getMachineFunction();
+  const DaySubtarget &STI = MF.getSubtarget<DaySubtarget>();
+
+  // Stores the assignment of the return value to a location.
   SmallVector<CCValAssign, 16> RVLocs;
 
+  // Info about the registers and stack slot.
   CCState CCInfo(CallConv, IsVarArg, DAG.getMachineFunction(), RVLocs,
                  *DAG.getContext());
 
   analyzeOutputArgs(DAG.getMachineFunction(), CCInfo, Outs, /*IsRet=*/true,
                     nullptr, CC_Day);
 
-  // CCInfo.AnalyzeReturn(Outs, RetCC_Day);
+  if (CallConv == CallingConv::GHC && !RVLocs.empty())
+    report_fatal_error("GHC functions return void only");
 
   SDValue Glue;
   SmallVector<SDValue, 4> RetOps(1, Chain);
 
-  for (unsigned i = 0, e = RVLocs.size(); i < e; ++i) {
+  // Copy the result values into the output registers.
+  for (unsigned i = 0, e = RVLocs.size(), OutIdx = 0; i < e; ++i, ++OutIdx) {
+    SDValue Val = OutVals[OutIdx];
     CCValAssign &VA = RVLocs[i];
     assert(VA.isRegLoc() && "Can only return in registers!");
-    Chain = DAG.getCopyToReg(Chain, DL, VA.getLocReg(), OutVals[i], Glue);
+
+    // Handle a 'normal' return.
+    Val = convertValVTToLocVT(DAG, Val, VA, DL, Subtarget);
+    Chain = DAG.getCopyToReg(Chain, DL, VA.getLocReg(), Val, Glue);
+
+    if (STI.isRegisterReservedByUser(VA.getLocReg()))
+      MF.getFunction().getContext().diagnose(DiagnosticInfoUnsupported{
+          MF.getFunction(),
+          "Return value register required, but has been reserved."});
+
+    // Guarantee that all emitted copies are stuck together.
     Glue = Chain.getValue(1);
     RetOps.push_back(DAG.getRegister(VA.getLocReg(), VA.getLocVT()));
+    
   }
 
-  RetOps[0] = Chain;
+  RetOps[0] = Chain; // Update chain.
 
+  // Add the glue node if we have it.
   if (Glue.getNode()) {
     RetOps.push_back(Glue);
   }
 
-  return DAG.getNode(DayISD::RET_GLUE, DL, MVT::Other, RetOps);
+  // if (any_of(RVLocs,
+  //            [](CCValAssign &VA) { return VA.getLocVT().isScalableVector(); }))
+  //   MF.getInfo<DayMachineFunctionInfo>()->setIsVectorCall();
+
+  unsigned RetOpc = DayISD::RET_GLUE;
+  // Interrupt service routines use different return instructions.
+  // const Function &Func = DAG.getMachineFunction().getFunction();
+  // if (Func.hasFnAttribute("interrupt")) {
+  //   if (!Func.getReturnType()->isVoidTy())
+  //     report_fatal_error(
+  //         "Functions with the interrupt attribute must have void return type!");
+
+  //   MachineFunction &MF = DAG.getMachineFunction();
+  //   StringRef Kind =
+  //     MF.getFunction().getFnAttribute("interrupt").getValueAsString();
+
+  //   if (Kind == "supervisor")
+  //     RetOpc = DayISD::SRET_GLUE;
+  //   else
+  //     RetOpc = DayISD::MRET_GLUE;
+  // }
+
+  return DAG.getNode(RetOpc, DL, MVT::Other, RetOps);
 }
+
+
+
+
 
 const char *DayTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch ((DayISD::NodeType)Opcode) {

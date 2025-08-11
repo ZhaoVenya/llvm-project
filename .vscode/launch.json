@@ -7,11 +7,11 @@
                 "request": "launch",
                 "program": "${workspaceFolder}/build/bin/llc",
                 "args": [
-                    "-march=day",
+                    "-march=riscv32",
                     "-O0",
                     "-filetype=asm",
                     // "-print-before=asm-printer",
-                    "${workspaceFolder}/day_test_doc/src/bbb.ll",
+                    "${workspaceFolder}/day_test_doc/src/aaa.ll",
                     "-o",
                     "-",
                     "--debug"

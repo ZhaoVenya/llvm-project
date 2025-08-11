@@ -34,7 +34,7 @@ template <> struct MappingTraits<DayMachineFunctionInfo> {
 /// DayMachineFunctionInfo - This class is derived from MachineFunctionInfo
 /// and contains private Day-specific information for each MachineFunction.
 class DayMachineFunctionInfo : public MachineFunctionInfo {
-  const DaySubtarget *Subtarget;
+  // const DaySubtarget *Subtarget;
 private:
   /// FrameIndex for start of varargs area
   int VarArgsFrameIndex = 0;

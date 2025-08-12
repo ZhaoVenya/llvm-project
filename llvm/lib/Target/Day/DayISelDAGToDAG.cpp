@@ -14,3 +14,10 @@ FunctionPass *llvm::createDayISelDag(DayTargetMachine &TM,
   return new DayDAGToDAGISelLegacy(TM, OptLevel);
 }
 
+
+bool DayDAGToDAGISel::SelectAddrRegImm(SDValue Addr, SDValue &Base,
+                                         SDValue &Offset, bool IsRV32Zdinx) {
+
+  return false;
+}
+

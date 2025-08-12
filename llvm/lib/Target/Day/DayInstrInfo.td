@@ -136,12 +136,10 @@ def StoreTypeProfile : SDTypeProfile<0, 2, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]
 
 def AddrRegImm : ComplexPattern<iPTR, 2, "SelectAddrRegImm">;
 
-class ALU_S<string asmstr, bits<4> opcode, PatFrag OpNode> : 
+class ALU_S<string asmstr, bits<4> opcode> : 
         DayInstS<(outs), (ins GPR:$rs1, GPR:$rs2, simm14:$im14), 
         asmstr, "$rs1, $rs2($im14)",
-        opcode>{
-    let Pattern = [(OpNode GPR:$rs1, (add GPR:$rs2, simm14:$im14))];
-}
+        opcode>;
 
 /////////////////////////////////////////////////////////////////////////////////////
 //// B指令对应的Pattern
@@ -287,18 +285,18 @@ def LHU: ALU_L<"lhu", 0b0100, zextloadi16>;
 def LWU: ALU_L<"lwu", 0b0101, zextloadi32>;
 
 //// 也就是说ALU_S需要把对应的PatFrag去掉, 需要单独在Pat/StPat中定义
-def SB: ALU_S<"sb", 0b0000, truncstorei8>;
-def SH: ALU_S<"sh", 0b0001, truncstorei16>;
-def SW: ALU_S<"sw", 0b0010, store>;
+def SB: ALU_S<"sb", 0b0000>;
+def SH: ALU_S<"sh", 0b0001>;
+def SW: ALU_S<"sw", 0b0010>;
 
-class StPat<PatFrag StoreOp, RVInst Inst, RegisterClass StTy,
+class StPat<PatFrag StoreOp, DayInst Inst, RegisterClass StTy,
             ValueType vt>
-    : Pat<(StoreOp (vt StTy:$rs2), (AddrRegImm (XLenVT GPR:$rs1),
-                   simm12:$imm12)),
-          (Inst StTy:$rs2, GPR:$rs1, simm12:$imm12)>;
+    : Pat<(StoreOp (vt StTy:$rs2), (AddrRegImm (i32 GPR:$rs1),
+                   simm14:$imm14)),
+          (Inst StTy:$rs2, GPR:$rs1, simm14:$imm14)>;
 
-def : StPat<truncstorei8, SB, GPR, XLenVT>;
-def : StPat<truncstorei16, SH, GPR, XLenVT>;
+def : StPat<truncstorei8, SB, GPR, i32>;
+def : StPat<truncstorei16, SH, GPR, i32>;
 def : StPat<store, SW, GPR, i32>;
 
 def BEQ: ALU_B<"beq",   0b0000>;

@@ -14,8 +14,8 @@
                     "${workspaceFolder}/day_test_doc/src/bbb.ll",
                     "-o",
                     "-",
-                    "--debug",
-                    "--asm-show-inst"
+                    // "--debug",
+                    // "--asm-show-inst"
                 ],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}",

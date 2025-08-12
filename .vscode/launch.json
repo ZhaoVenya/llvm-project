@@ -7,14 +7,15 @@
                 "request": "launch",
                 "program": "${workspaceFolder}/build/bin/llc",
                 "args": [
-                    "-march=riscv32",
+                    "-march=day",
                     "-O0",
                     "-filetype=asm",
                     // "-print-before=asm-printer",
-                    "${workspaceFolder}/day_test_doc/src/aaa.ll",
+                    "${workspaceFolder}/day_test_doc/src/bbb.ll",
                     "-o",
                     "-",
-                    "--debug"
+                    // "--debug",
+                    // "--asm-show-inst"
                 ],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}",

@@ -60,84 +60,43 @@ SDValue DayTargetLowering::LowerFormalArguments(
 
 
 
-SDValue
-DayTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
-                                 bool IsVarArg,
-                                 const SmallVectorImpl<ISD::OutputArg> &Outs,
-                                 const SmallVectorImpl<SDValue> &OutVals,
-                                 const SDLoc &DL, SelectionDAG &DAG) const {
-  MachineFunction &MF = DAG.getMachineFunction();
-  const DaySubtarget &STI = MF.getSubtarget<DaySubtarget>();
-
-  // Stores the assignment of the return value to a location.
-  SmallVector<CCValAssign, 16> RVLocs;
-
-  // Info about the registers and stack slot.
-  CCState CCInfo(CallConv, IsVarArg, DAG.getMachineFunction(), RVLocs,
-                 *DAG.getContext());
-
-  analyzeOutputArgs(DAG.getMachineFunction(), CCInfo, Outs, /*IsRet=*/true,
-                    nullptr, CC_Day);
-
-  if (CallConv == CallingConv::GHC && !RVLocs.empty())
-    report_fatal_error("GHC functions return void only");
-
-  SDValue Glue;
-  SmallVector<SDValue, 4> RetOps(1, Chain);
-
-  // Copy the result values into the output registers.
-  for (unsigned i = 0, e = RVLocs.size(), OutIdx = 0; i < e; ++i, ++OutIdx) {
-    SDValue Val = OutVals[OutIdx];
-    CCValAssign &VA = RVLocs[i];
-    assert(VA.isRegLoc() && "Can only return in registers!");
-
-    // Handle a 'normal' return.
-    Val = convertValVTToLocVT(DAG, Val, VA, DL, Subtarget);
-    Chain = DAG.getCopyToReg(Chain, DL, VA.getLocReg(), Val, Glue);
-
-    if (STI.isRegisterReservedByUser(VA.getLocReg()))
-      MF.getFunction().getContext().diagnose(DiagnosticInfoUnsupported{
-          MF.getFunction(),
-          "Return value register required, but has been reserved."});
-
-    // Guarantee that all emitted copies are stuck together.
-    Glue = Chain.getValue(1);
-    RetOps.push_back(DAG.getRegister(VA.getLocReg(), VA.getLocVT()));
-    
+// 核心：重写LowerReturn，将通用RET转换为自定义RET_GLUE
+SDValue DayTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
+                                      bool IsVarArg,
+                                      const SmallVectorImpl<ISD::OutputArg> &Outs,
+                                      const SmallVectorImpl<SDValue> &OutVals,
+                                      const SDLoc &DL, SelectionDAG &DAG) const {
+// 1. 处理返回值。
+  // 遍历所有返回值，将其从 OutVals 复制到约定的返回寄存器中。
+  // 比如，如果返回值在 OutVals[0] 中，你需要将其复制到寄存器 A0。
+  // 可以使用 CopyToReg 节点来完成这个操作。
+  //
+  // 这里简化处理，假设只有一个返回值，并且已经存在于 OutVals[0] 中。
+  if (!Outs.empty()) {
+    Chain = DAG.getCopyToReg(Chain, DL, Day::A0, OutVals[0], SDValue());
   }
 
-  RetOps[0] = Chain; // Update chain.
+  // 2. 将返回值寄存器和 Chain 节点打包成一个 Glue 节点。
+  // 这是为了确保 retglue 节点在所有 CopyToReg 完成后执行。
+  SDValue Glue = Chain.getValue(1);
+  SmallVector<SDValue, 1> RetOps;
+  RetOps.push_back(Chain);
 
-  // Add the glue node if we have it.
-  if (Glue.getNode()) {
-    RetOps.push_back(Glue);
+  // 如果有返回值，需要将返回值寄存器也作为操作数传递给 RET_GLUE。
+  if (!Outs.empty()) {
+      RetOps.push_back(DAG.getRegister(Day::A0, MVT::i32));
   }
 
-  // if (any_of(RVLocs,
-  //            [](CCValAssign &VA) { return VA.getLocVT().isScalableVector(); }))
-  //   MF.getInfo<DayMachineFunctionInfo>()->setIsVectorCall();
+  // 3. 创建 retglue 节点。
+  // 注意，这里创建的是你自定义的 retglue 节点。
+  SDValue RetNode = DAG.getNode(DayISD::RET_GLUE, DL, MVT::Other, RetOps);
 
-  unsigned RetOpc = DayISD::RET_GLUE;
-  // Interrupt service routines use different return instructions.
-  // const Function &Func = DAG.getMachineFunction().getFunction();
-  // if (Func.hasFnAttribute("interrupt")) {
-  //   if (!Func.getReturnType()->isVoidTy())
-  //     report_fatal_error(
-  //         "Functions with the interrupt attribute must have void return type!");
-
-  //   MachineFunction &MF = DAG.getMachineFunction();
-  //   StringRef Kind =
-  //     MF.getFunction().getFnAttribute("interrupt").getValueAsString();
-
-  //   if (Kind == "supervisor")
-  //     RetOpc = DayISD::SRET_GLUE;
-  //   else
-  //     RetOpc = DayISD::MRET_GLUE;
-  // }
-
-  return DAG.getNode(RetOpc, DL, MVT::Other, RetOps);
+  // 4. 将 retglue 节点标记为终结节点。
+  // 这会确保 retglue 节点是 SelectionDAG 的根。
+  DAG.setRoot(RetNode);
+  
+  return RetNode;
 }
-
 
 
 

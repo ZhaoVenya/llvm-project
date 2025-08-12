@@ -246,4 +246,26 @@ unsigned DayInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
 
 
 
+bool DayInstrInfo::expandPostRAPseudo(MachineInstr &MI) const {
+  // ... 在这里实现展开逻辑 ...
+  MachineBasicBlock &MBB = *MI.getParent();
+  DebugLoc DL = MI.getDebugLoc();
 
+  if (MI.getOpcode() == Day::PseudoRET) {
+    // 展开成 jalr Day::ZERO, Day::RA, 0
+    BuildMI(MBB, MI, DL, get(Day::JALR))
+        .addReg(Day::ZERO, RegState::Define) // rd
+        .addReg(Day::RA)                     // rs1
+        .addImm(0);                          // imm
+
+    // 如果 JALR 的操作数需要更多信息，比如一个立即数
+    // BuildMI(MBB, MI, DL, get(Day::JALR)).addReg(Day::X1).addImm(0);
+
+    // 删除原始的伪指令
+    MI.eraseFromParent();
+    return true;
+  }
+
+  // 如果不是我们关心的伪指令，返回 false
+  return false;
+}

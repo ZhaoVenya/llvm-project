@@ -14,7 +14,6 @@ enum NodeType : unsigned { FIRST_NUMBER = ISD::BUILTIN_OP_END, RET_GLUE, Call};
 
 class DayTargetLowering : public TargetLowering {
   const DaySubtarget *STI;
-  const DaySubtarget &Subtarget;
 
 public:
   explicit DayTargetLowering(const TargetMachine &TM,

@@ -80,7 +80,6 @@ void printCustomAliasOperand(const MCInst *MI, uint64_t Address,
 
 
 // const char *DayInstPrinter::getRegisterName(MCRegister Reg) {
-//   return getRegisterName(Reg, ArchRegNames ? Day::NoRegAltName
-//                                            : Day::ABIRegAltName);
+//   return getRegisterName(Reg, Day::NoRegAltName);
 // }
 

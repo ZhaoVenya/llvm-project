@@ -83,7 +83,7 @@ public:
   unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
 
   // Lower pseudo instructions after register allocation.
-  // bool expandPostRAPseudo(MachineInstr &MI) const override;
+  bool expandPostRAPseudo(MachineInstr &MI) const override;
 };
 
 }

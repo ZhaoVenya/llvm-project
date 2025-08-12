@@ -253,7 +253,7 @@ def JALR : ALU_I_JALR<"jalr", 0b1010>; // 这个地方需要定义Pat
 def retglue : SDNode<"DayISD::RET_GLUE", SDTNone, 
         [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
-let isBarrier = 1, isReturn = 1, isTerminator = 1, mayLoad = 0, mayStore = 0, hasSideEffects = 1 in {
+let isBarrier=1, isReturn=1, isCall=0, isTerminator=1, mayLoad=0, mayStore=0, hasSideEffects=1 in {
   def PseudoRET : DayInstPseudo<
               (outs),
               (ins),
@@ -261,7 +261,7 @@ let isBarrier = 1, isReturn = 1, isTerminator = 1, mayLoad = 0, mayStore = 0, ha
               PseudoInstExpansion<(JALR ZERO, RA, 0)>;
 }
 
-def : InstAlias<"ret", (JALR ZERO, RA, 0)>;
+def : InstAlias<"ret a0", (JALR ZERO, RA, 0)>;
 
 def DaySDT_Call : SDTypeProfile<0, -1, [SDTCisVT<0, iPTR>]>;
 

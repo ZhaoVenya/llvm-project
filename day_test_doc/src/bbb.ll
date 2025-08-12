@@ -6,6 +6,8 @@ target triple = "day-unknown-unknown-elf"
 ; Function Attrs: noinline nounwind optnone
 define dso_local i32 @main() #0 {
 entry:
+  %retval = alloca i32, align 4
+  store i32 0, ptr %retval, align 4
   ret i32 10
 }
 
@@ -16,4 +18,4 @@ attributes #0 = { noinline nounwind optnone "frame-pointer"="all" "no-trapping-m
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.7 (https://github.com/ZhaoVenya/llvm-project.git ae9cce1ffe28fa0f708e150833e62f3a79c0d39b)"}
+!2 = !{!"clang version 20.1.7 (https://github.com/ZhaoVenya/llvm-project.git f97c37e785713af23eec62364f8770602b0c7f51)"}

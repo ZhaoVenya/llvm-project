@@ -134,6 +134,8 @@ def StoreTypeProfile : SDTypeProfile<0, 2, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]
 //         [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
 //         SDNPMayStore,SDNPMemOperand]>;
 
+def AddrRegImm : ComplexPattern<iPTR, 2, "SelectAddrRegImm">;
+
 class ALU_S<string asmstr, bits<4> opcode, PatFrag OpNode> : 
         DayInstS<(outs), (ins GPR:$rs1, GPR:$rs2, simm14:$im14), 
         asmstr, "$rs1, $rs2($im14)",
@@ -261,7 +263,7 @@ let isBarrier=1, isReturn=1, isCall=0, isTerminator=1, mayLoad=0, mayStore=0, ha
               PseudoInstExpansion<(JALR ZERO, RA, 0)>;
 }
 
-def : InstAlias<"ret a0", (JALR ZERO, RA, 0)>;
+def : InstAlias<"ret", (JALR ZERO, RA, 0)>;
 
 def DaySDT_Call : SDTypeProfile<0, -1, [SDTCisVT<0, iPTR>]>;
 
@@ -284,9 +286,20 @@ def LBU: ALU_L<"lbu", 0b0011, zextloadi8>;
 def LHU: ALU_L<"lhu", 0b0100, zextloadi16>;
 def LWU: ALU_L<"lwu", 0b0101, zextloadi32>;
 
+//// 也就是说ALU_S需要把对应的PatFrag去掉, 需要单独在Pat/StPat中定义
 def SB: ALU_S<"sb", 0b0000, truncstorei8>;
 def SH: ALU_S<"sh", 0b0001, truncstorei16>;
 def SW: ALU_S<"sw", 0b0010, store>;
+
+class StPat<PatFrag StoreOp, RVInst Inst, RegisterClass StTy,
+            ValueType vt>
+    : Pat<(StoreOp (vt StTy:$rs2), (AddrRegImm (XLenVT GPR:$rs1),
+                   simm12:$imm12)),
+          (Inst StTy:$rs2, GPR:$rs1, simm12:$imm12)>;
+
+def : StPat<truncstorei8, SB, GPR, XLenVT>;
+def : StPat<truncstorei16, SH, GPR, XLenVT>;
+def : StPat<store, SW, GPR, i32>;
 
 def BEQ: ALU_B<"beq",   0b0000>;
 def BNE: ALU_B<"bne",   0b0001>;

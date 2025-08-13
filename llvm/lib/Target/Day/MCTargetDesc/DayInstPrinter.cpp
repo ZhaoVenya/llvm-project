@@ -37,7 +37,7 @@ void DayInstPrinter::printInst(const MCInst *MI, uint64_t Address,
 }
 
 void DayInstPrinter::printRegName(raw_ostream &O, MCRegister Reg) {
-  markup(O, Markup::Register) << getRegisterName(Reg);
+  markup(O, Markup::Register) << getRegisterName(Reg,0);
 }
 
 

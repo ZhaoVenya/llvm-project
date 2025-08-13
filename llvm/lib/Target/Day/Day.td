@@ -13,7 +13,7 @@ def DayInstrInfo : InstrInfo {
 
 def DayAsmParser : AsmParser {
   let ShouldEmitMatchRegisterAltName = 1;
-  let AllowDuplicateRegisterNames = 0;
+  let AllowDuplicateRegisterNames = 1;
 }
 
 def DayAsmWriter : AsmWriter {

@@ -10,7 +10,12 @@
 
 
 int main(){
-    
+    int a = 2;
+    int b;
+    b = 1;
+
+    a = a + b;
+
     return 10;
 }
 

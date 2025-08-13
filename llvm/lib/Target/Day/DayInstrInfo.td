@@ -7,9 +7,9 @@ include "DayInstrFormats.td"
 
 def simm32 : Operand<i32>, ImmLeaf<i32, [{ return isInt<32>(Imm);}]>;
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 //// R指令对应的Pattern
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 class ALU_RR_I<string asmstr, bits<4> opcode, SDNode OpNode> : 
         DayInstR_I<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), 
         asmstr, "$rd, $rs1, $rs2", 
@@ -58,9 +58,9 @@ class ALU_RR_RF_PatFrag<string asmstr, bits<4> opcode, PatFrag OpNode> :
     let Pattern = [(set GPR:$rd, (OpNode FPR:$rs1, FPR:$rs2))];
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 //// R4指令对应的Pattern
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 class ALU_R4_I<string asmstr, bits<4> opcode> : 
         DayInstR4_I<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2, GPR:$rs3), 
         asmstr, "$rd, $rs1, $rs2, $rs3", 
@@ -71,9 +71,9 @@ class ALU_R4_F<string asmstr, bits<4> opcode> :
         asmstr, "$rd, $rs1, $rs2, $rs3", 
         opcode>;
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 //// I指令对应的Pattern
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 def simm14 : Operand<i32>, ImmLeaf<i32, [{ return isInt<14>(Imm);}]>;
 def simm14j: Operand<i32>;
 
@@ -103,9 +103,9 @@ class ALU_I_JALR<string asmstr, bits<4> opcode> :
     let Pattern = [];
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 //// L指令对应的Pattern
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 def LoadTypeProfile : SDTypeProfile<1, 1, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>;
 
 
@@ -115,24 +115,16 @@ def LoadTypeProfile : SDTypeProfile<1, 1, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>
 //         [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
 //         SDNPMayLoad,SDNPMemOperand]>;
 
-class ALU_L<string asmstr, bits<4> opcode, PatFrag OpNode> : 
+class ALU_L<string asmstr, bits<4> opcode> : 
         DayInstL<(outs GPR:$rd), (ins GPR:$rs1, simm14:$im14), 
         asmstr, "$rd, $rs1($im14)", 
-        opcode>{
-    let Pattern = [(set GPR:$rd, (OpNode (add GPR:$rs1, simm14:$im14)))];
-}
+        opcode>;
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 //// S指令对应的Pattern
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 
 def StoreTypeProfile : SDTypeProfile<0, 2, [SDTCisVT<0, i32>, SDTCisVT<1, iPTR>]>;
-
-// def M_STORE : SDNode<
-//         "DayISD::M_STORE",
-//         StoreTypeProfile,
-//         [SDNPHasChain,SDNPOutGlue,SDNPInGlue,
-//         SDNPMayStore,SDNPMemOperand]>;
 
 def AddrRegImm : ComplexPattern<iPTR, 2, "SelectAddrRegImm">;
 
@@ -141,21 +133,14 @@ class ALU_S<string asmstr, bits<4> opcode> :
         asmstr, "$rs1, $rs2($im14)",
         opcode>;
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 //// B指令对应的Pattern
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 def Imm16AsmOperand : AsmOperandClass {
   let Name = "Imm16";
   let PredicateMethod = "isImm16";
   let ParserMethod = "parseImm16";
 }
-
-// def simm16_br : Operand<i32> {
-//   let ParserMatchClass = Imm16AsmOperand;
-//   let EncoderMethod = "getBranch16TargetOpValue";
-//   let OperandType = "OPERAND_PCREL";
-//   let DecoderMethod = "decodeSimm16";
-// }
 
 def brtarget : Operand<OtherVT>{
   let PrintMethod = "printBranchOperand";
@@ -171,40 +156,22 @@ class ALU_B<string asmstr, bits<4> opcode> :
     let Pattern = [];
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 //// U指令对应的Pattern
-/////////////////////////////////////////////////////////////////////////////////////
-
-
-
+/////////////////////////////////////////////////////////////////////////////////////////
 class ALU_U<string asmstr, bits<4> opcode> : 
         DayInstU<(outs GPR:$rd), (ins simm32:$im32), 
         asmstr, "$rd, $im32",
         opcode>;
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 //// J指令对应的Pattern
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 class ALU_J<string asmstr> : 
         DayInstJ<(outs GPR:$rd), (ins brtarget:$im32), 
         asmstr, "$rd, $im32">;
 
-//////////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////////////
-// class ALU_C_RR<string asmstr, bits<4> opcode, SDNode OpNode> : 
-//         DayInstC<(out GPR:$rd),(ins GPR:$rs1),asmstr, argstr>;
-
-// class ALU_C_RF<string asmstr, bits<4> opcode, SDNode OpNode> : 
-//         DayInstC<(out FPR:$rd),(ins GPR:$rs1),asmstr, argstr>;
-
-// class ALU_C_FR<string asmstr, bits<4> opcode, SDNode OpNode> : 
-//         DayInstC<(out GPR:$rd),(ins FPR:$rs1),asmstr, argstr>;
-
-// class ALU_C_FF<string asmstr, bits<4> opcode, SDNode OpNode> : 
-//         DayInstC<(out FPR:$rd),(ins FPR:$rs1),asmstr, argstr>;
-
-
+/////////////////////////////////////////////////////////////////////////////////////////
 def ADD : ALU_RR_I<"add", 0b0000, add>;
 def SUB : ALU_RR_I<"sub", 0b0001, sub>;
 def MUL : ALU_RR_I<"mul", 0b0010, mul>;
@@ -224,7 +191,7 @@ def SUBF: ALU_RR_F<"subf", 0b0001, fsub>;
 def MULF: ALU_RR_F<"mulf", 0b0010, fmul>;
 def DIVF: ALU_RR_F<"divf", 0b0011, fdiv>;
 def SLTF : ALU_RR_RF_PatFrag<"sltf", 0b0100, fsetolt>;
-
+/////////////////////////////////////////////////////////////////////////////////////////
 def MPAP: ALU_R4_I<"mpap", 0b0011>;
 def MPAN: ALU_R4_I<"mpan", 0b0100>;
 def MNAP: ALU_R4_I<"mnap", 0b0101>;
@@ -236,7 +203,7 @@ def MPAPF: ALU_R4_F<"mpapf", 0b0011>;
 def MPANF: ALU_R4_F<"mpanf", 0b0100>;
 def MNAPF: ALU_R4_F<"mnapf", 0b0101>;
 def MNANF: ALU_R4_F<"mnanf", 0b0110>;
-
+/////////////////////////////////////////////////////////////////////////////////////////
 def ADDI: ALU_I<"addi", 0b1011, add>;
 def SUBI: ALU_I<"subi", 0b0001, sub>;
 def MULI: ALU_I<"muli", 0b0010, mul>;
@@ -248,8 +215,7 @@ def ORI : ALU_I<"ori",  0b0111, or>;
 def XORI: ALU_I<"xor", 0b1000, xor>;
 def JALR : ALU_I_JALR<"jalr", 0b1010>; // 这个地方需要定义Pat
 
-
-
+/////////////////////////////////////////////////////////////////////////////////////////
 def retglue : SDNode<"DayISD::RET_GLUE", SDTNone, 
         [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
@@ -276,15 +242,35 @@ def CALL : DayInstPseudo<(outs), (ins GPR:$rs1), [(day_call GPR:$rs1)]>, PseudoI
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////
-def LB: ALU_L<"lb", 0b0000, sextloadi8 >;
-def LH: ALU_L<"lh", 0b0001, sextloadi16>;
-def LW: ALU_L<"lw", 0b0010, sextloadi32>;
-def LBU: ALU_L<"lbu", 0b0011, zextloadi8>;
-def LHU: ALU_L<"lhu", 0b0100, zextloadi16>;
-def LWU: ALU_L<"lwu", 0b0101, zextloadi32>;
+/////////////////////////////////////////////////////////////////////////////////////////
+// def LB: ALU_L<"lb", 0b0000, sextloadi8 >;
+// def LH: ALU_L<"lh", 0b0001, sextloadi16>;
+// def LW: ALU_L<"lw", 0b0010, load>;
+// def LBU: ALU_L<"lbu", 0b0011, zextloadi8>;
+// def LHU: ALU_L<"lhu", 0b0100, zextloadi16>;
+// def LWU: ALU_L<"lwu", 0b0101, load>;
 
-//// 也就是说ALU_S需要把对应的PatFrag去掉, 需要单独在Pat/StPat中定义
+def LB: ALU_L<"lb", 0b0000>;
+def LH: ALU_L<"lh", 0b0001>;
+def LW: ALU_L<"lw", 0b0010>;
+def LBU: ALU_L<"lbu", 0b0011>;
+def LHU: ALU_L<"lhu", 0b0100>;
+def LWU: ALU_L<"lwu", 0b0101>;
+
+class LdPat<PatFrag LoadOp, DayInst Inst, ValueType vt>
+    : Pat<(vt (LoadOp (AddrRegImm (i32 GPR:$rs1), simm14:$imm14))),
+          (Inst GPR:$rs1, simm14:$imm14)>;
+
+def : LdPat<sextloadi8, LB, i32>;
+def : LdPat<sextloadi16, LH, i32>;
+def : LdPat<load, LW, i32>;
+
+def : LdPat<extloadi8, LBU, i32>;
+def : LdPat<zextloadi16, LHU, i32>;
+def : LdPat<load, LWU, i32>;
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
 def SB: ALU_S<"sb", 0b0000>;
 def SH: ALU_S<"sh", 0b0001>;
 def SW: ALU_S<"sw", 0b0010>;
@@ -298,6 +284,7 @@ class StPat<PatFrag StoreOp, DayInst Inst, RegisterClass StTy,
 def : StPat<truncstorei8, SB, GPR, i32>;
 def : StPat<truncstorei16, SH, GPR, i32>;
 def : StPat<store, SW, GPR, i32>;
+/////////////////////////////////////////////////////////////////////////////////////////
 
 def BEQ: ALU_B<"beq",   0b0000>;
 def BNE: ALU_B<"bne",   0b0001>;
@@ -322,8 +309,7 @@ def AUIPC: ALU_U<"auipc", 0b0001>{
     let mayStore = 0;
     let hasSideEffects = 1;
 }
-/////////////////////////////////////////////
-
+/////////////////////////////////////////////////////////////////////////////////////////
 
 def JAL: ALU_J<"jal">{
     let hasSideEffects = 1;

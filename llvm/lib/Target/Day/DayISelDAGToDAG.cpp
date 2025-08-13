@@ -15,9 +15,24 @@ FunctionPass *llvm::createDayISelDag(DayTargetMachine &TM,
 }
 
 
-bool DayDAGToDAGISel::SelectAddrRegImm(SDValue Addr, SDValue &Base,
-                                         SDValue &Offset, bool IsRV32Zdinx) {
+bool DayDAGToDAGISel::SelectAddrFrameIndex(SDValue Addr, SDValue &Base,
+                                             SDValue &Offset) {
+  if (auto *FIN = dyn_cast<FrameIndexSDNode>(Addr)) {
+    Base = CurDAG->getTargetFrameIndex(FIN->getIndex(), Subtarget->getXLenVT());
+    Offset = CurDAG->getTargetConstant(0, SDLoc(Addr), Subtarget->getXLenVT());
+    return true;
+  }
 
+  return false;
+}
+
+
+bool DayDAGToDAGISel::SelectAddrRegImm(SDValue Addr, SDValue &Base,
+                                         SDValue &Offset) {
+  
+  if (SelectAddrFrameIndex(Addr, Base, Offset))
+    return true;
+  
   return false;
 }
 

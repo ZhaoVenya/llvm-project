@@ -30,8 +30,8 @@ public:
   void printCustomAliasOperand(const MCInst *MI, uint64_t Address,
                                unsigned OpIdx, unsigned PrintMethodIdx,
                                const MCSubtargetInfo &STI, raw_ostream &O);
-  const char *getRegisterName(MCRegister Reg);
-  const char *getRegisterName(MCRegister Reg, unsigned AltIdx);
+  static const char *getRegisterName(MCRegister Reg);
+  static const char *getRegisterName(MCRegister Reg, unsigned AltIdx);
   std::pair<const char *, uint64_t> getMnemonic(const MCInst &MI) const override;
 };
 } // namespace llvm

@@ -2,15 +2,15 @@
 #define DAY_MCTARGETDESC_H
 
 // 在 Day.h 或 DayMCTargetDesc.h 中
-namespace llvm{
-  namespace Day {
-  enum {
-    NoRegAltName = 0,
-    ABIRegAltName = 1
-  };
-}
+// namespace llvm{
+//   namespace Day {
+//   enum {
+//     NoRegAltName = 0,
+//     ABIRegAltName = 1
+//   };
+// }
 
-}
+// }
 
 #define GET_REGINFO_ENUM
 #include "DayGenRegisterInfo.inc"

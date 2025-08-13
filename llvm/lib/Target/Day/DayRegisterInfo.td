@@ -4,10 +4,14 @@
 \*********************************************************************/
 
 // 定义一个命名空间 "Day"，用于组织 Day 架构的寄存器信息。
+def ABIRegAltName : RegAltNameIndex;
+
+
 let Namespace = "Day" in {
     class DayReg<bits<5>Enc, string n,list<string> alt = []>:Register<n>{
         let HWEncoding{4-0} = Enc;
         let AltNames = alt;
+        let RegAltNameIndices = [ABIRegAltName];
     }
 }
 

@@ -27,7 +27,7 @@ public:
   MachineBasicBlock::iterator eliminateCallFramePseudoInstr(MachineFunction &MF,
                                 MachineBasicBlock &MBB,
                                 MachineBasicBlock::iterator I) const override;
-
+  uint64_t computeStackSize(MachineFunction &MF) const;
 protected:
   const DaySubtarget &STI;
   // 这个函数返回的是一个bool值，用来表示当前函数时都需要实现帧指针

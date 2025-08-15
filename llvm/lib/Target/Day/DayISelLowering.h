@@ -6,6 +6,8 @@
 
 #include "llvm/CodeGen/TargetLowering.h"
 
+
+
 namespace llvm {
 class DaySubtarget;
 namespace DayISD {
@@ -41,6 +43,9 @@ private:
                          const SmallVectorImpl<ISD::OutputArg> &Outs,
                          bool IsRet, CallLoweringInfo *CLI,
                          DayCCAssignFn Fn) const;
+  
+  SDValue LowerCall(CallLoweringInfo &CLI, SmallVectorImpl<SDValue> &InVals) const override;
+  SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
 
 };
 } // namespace llvm

@@ -309,6 +309,13 @@ def AUIPC: ALU_U<"auipc", 0b0001>{
     let mayStore = 0;
     let hasSideEffects = 1;
 }
+
+
+// def hi : ImmOp<"DayMCExpr::HI">;
+// def lo : ImmOp<"DayMCExpr::LO">;
+// // 定义一个可以加载任意32位立即数的模式
+// def ADDI_LUI : Pat<(i32 imm:$imm), (ADDI (LUI (hi $imm)), (i32 (lo $imm)))>;
+
 /////////////////////////////////////////////////////////////////////////////////////////
 
 def JAL: ALU_J<"jal">{

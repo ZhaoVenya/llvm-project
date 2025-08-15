@@ -23,9 +23,10 @@ typedef bool DayCCAssignFn(unsigned ValNo, MVT ValVT, MVT LocVT,
  IsRet: 是不是返回数值
  OrigTy: 原始类型,
 */
+
 bool CC_Day(unsigned ValNo, MVT ValVT, MVT LocVT,
               CCValAssign::LocInfo LocInfo, ISD::ArgFlagsTy ArgFlags,
-              CCState &State, bool IsFixed, bool IsRet, Type *OrigTy);
+              CCState &State);
 
 
 } // end namespace llvm

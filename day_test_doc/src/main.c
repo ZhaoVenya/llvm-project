@@ -8,14 +8,20 @@
 //     return (MAX_SIZE - index);
 // }
 
+int add(int a, int b){
+    int c;
+    c = a + b;
+    return c;
+}
 
 int main(){
     int a = 2;
-    int b;
-    b = 1;
+    int b,c;
 
+    b = 1;
     a = a + b;
 
-    return 10;
-}
+    c = add(a,b);
 
+    return c;
+}

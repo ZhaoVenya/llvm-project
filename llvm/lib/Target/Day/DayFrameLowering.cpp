@@ -6,6 +6,11 @@
 using namespace llvm;
 
 
+
+static Align getABIStackAlignment() {
+  return Align(8);
+}
+
 /*
  DayFrameLowering class的构造函数，继承 TargetFrameLowering.
 
@@ -20,46 +25,71 @@ using namespace llvm;
 */
 DayFrameLowering::DayFrameLowering(const DaySubtarget &ST)
     : TargetFrameLowering(TargetFrameLowering::StackGrowsDown,
-                          Align(8), 0, Align(8),
+                          getABIStackAlignment(),
+                          0,
+                          getABIStackAlignment(),
                           /*StackRealignable=*/false),STI(ST) {
 
 }
 
 
+uint64_t DayFrameLowering::computeStackSize(MachineFunction &MF) const {
+  uint64_t STACKSIZE = MF.getFrameInfo().getStackSize();
+  if (getStackAlignment() > 0) {
+    STACKSIZE = ROUND_UP(STACKSIZE, getStackAlignment());
+  }
+  return STACKSIZE;
+}
+
 void DayFrameLowering::emitPrologue(MachineFunction &MF,
-                                      MachineBasicBlock &MBB) const {
+                                    MachineBasicBlock &MBB) const {
 
-    MachineFrameInfo &MFI = MF.getFrameInfo();
-    auto *RVFI = MF.getInfo<DayMachineFunctionInfo>();
-    const DayRegisterInfo *RI = static_cast<const DayRegisterInfo *>(STI.getRegisterInfo());
-    const DayInstrInfo *TII = STI.getInstrInfo();
-    MachineBasicBlock::iterator MBBI = MBB.begin();
+  MachineBasicBlock::iterator MBBI = MBB.begin();
 
+  const TargetInstrInfo &TII = *STI.getInstrInfo();
+
+  int STACKSIZE = computeStackSize(MF);
+
+  if (STACKSIZE == 0) {
+    return;
+  }
+
+  DebugLoc DL = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  BuildMI(MBB, MBBI, DL, TII.get(Day::ADDI), Day::SP)
+      .addReg(Day::SP)
+      .addImm(-STACKSIZE)
+      .setMIFlag(MachineInstr::FrameSetup);
 
 }
 
 
+
 void DayFrameLowering::emitEpilogue(MachineFunction &MF,
                                       MachineBasicBlock &MBB) const {
+  MachineBasicBlock::iterator MBBI = MBB.getLastNonDebugInstr();
 
+  const TargetInstrInfo &TII = *STI.getInstrInfo();
+
+  int STACKSIZE = computeStackSize(MF);
+
+  if (STACKSIZE == 0) {
+    return;
+  }
+
+  DebugLoc DL = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  BuildMI(MBB, MBBI, DL, TII.get(Day::ADDI), Day::SP)
+      .addReg(Day::SP)
+      .addImm(STACKSIZE)
+      .setMIFlag(MachineInstr::FrameDestroy);
 }
 
 
 void DayFrameLowering::determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
                             RegScavenger *RS) const {
-    TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);  
-//     if (hasFP(MF)) {
-//         SavedRegs.set(RAReg);
-//         SavedRegs.set(FPReg);
-//     }
-//     // Mark BP as used if function has dedicated base pointer.
-//     if (hasBP(MF))
-//         SavedRegs.set(RISCVABI::getBPReg());
-
-//   // When using cm.push/pop we must save X27 if we save X26.
-//     auto *RVFI = MF.getInfo<RISCVMachineFunctionInfo>();
-//     if (RVFI->isPushable(MF) && SavedRegs.test(RISCV::X26))
-//         SavedRegs.set(RISCV::X27);
+    TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
+    if (MF.getFrameInfo().hasCalls()) {
+        SavedRegs.set(Day::RA);
+    }
 }
 
 

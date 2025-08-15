@@ -2,6 +2,7 @@ add_llvm_component_library(LLVMDayDesc
         DayMCTargetDesc.cpp
         DayInstPrinter.cpp
         DayMCAsmInfo.cpp
+        DayMCExpr.cpp
 
         LINK_COMPONENTS
         Support

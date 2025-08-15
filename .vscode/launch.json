@@ -13,9 +13,9 @@
                     // "-print-before=asm-printer",
                     "${workspaceFolder}/day_test_doc/src/bbb.ll",
                     "-o",
-                    "-",
-                    // "${workspaceFolder}/day_test_doc/src/day_main.s",
-                    // "--debug",
+                    // "-",
+                    "${workspaceFolder}/day_test_doc/src/day_main.s",
+                    "--debug",
                     // "--asm-show-inst"
                 ],
                 "stopAtEntry": false,

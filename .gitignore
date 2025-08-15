@@ -79,3 +79,5 @@ day_test_doc/build
 day_test_doc/build/dag
 day_test_doc/build/obj
 day_test_doc/build/bin
+day_test_doc/src/*.s
+day_test_doc/src/aaa.ll

@@ -1,13 +1,13 @@
 #ifndef DAY_ASMPRINTER_H_
 #define DAY_ASMPRINTER_H_
 
-#include "DayMCInstLowering.h"
+// #include "DayMCInstLowering.h"
 #include "llvm/CodeGen/AsmPrinter.h"
 
 namespace llvm {
 
 class LLVM_LIBRARY_VISIBILITY DayAsmPrinter : public AsmPrinter {
-  DayMCInstLower MCInstLowering;
+  // DayMCInstLower MCInstLowering;
 
 public:
   explicit DayAsmPrinter(TargetMachine &TM,
@@ -22,6 +22,7 @@ public:
 private:
   // bool emitPseudoExpansionLowering(MCStreamer &OutStreamer, const MachineInstr *MI);
   bool lowerPseudoInstExpansion(const MachineInstr *MI, MCInst &Inst);
+  void lowerToMCInst(const MachineInstr *MI, MCInst &Out);
 
 
 };

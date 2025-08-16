@@ -24,7 +24,6 @@ add_llvm_target(DayCodeGen
   DayISelLowering.cpp
   DayISelDAGToDAG.cpp
   DayMachineFunctionInfo.cpp
-  DayMCInstLowering.cpp
   DayRegisterInfo.cpp
   DaySubtarget.cpp
   DayTargetMachine.cpp

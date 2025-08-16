@@ -8,7 +8,7 @@
 //     return (MAX_SIZE - index);
 // }
 
-int add(int a, int b){
+int myadd(int a, int b){
     int c;
     c = a + b;
     return c;
@@ -21,7 +21,7 @@ int main(){
     b = 1;
     a = a + b;
 
-    c = add(a,b);
+    c = myadd(a,b);
 
     return c;
 }

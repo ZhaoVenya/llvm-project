@@ -4,6 +4,7 @@
 #include "DayAsmPrinter.h"
 
 #include "MCTargetDesc/DayMCTargetDesc.h"
+#include "MCTargetDesc/DayMCExpr.h"
 #include "TargetInfo/DayTargetInfo.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/TargetRegistry.h"
@@ -17,22 +18,36 @@ using namespace llvm;
 
 DayAsmPrinter::DayAsmPrinter(TargetMachine &TM,
                                    std::unique_ptr<MCStreamer> Streamer)
-    : AsmPrinter(TM, std::move(Streamer)), MCInstLowering(OutContext, *this) {}
+    : AsmPrinter(TM, std::move(Streamer)) {}
 
 void DayAsmPrinter::emitInstruction(const MachineInstr *MI) {
-  // if (emitPseudoExpansionLowering(*OutStreamer, MI)) {
-  //   return;
-  // }
+
+  if (MCInst OutInst; lowerPseudoInstExpansion(MI, OutInst)) {
+    EmitToStreamer(*OutStreamer, OutInst);
+    return;
+  }
+
   MCInst TmpInst;
-  MCInstLowering.Lower(MI, TmpInst);
+  lowerToMCInst(MI, TmpInst);
   EmitToStreamer(*OutStreamer, TmpInst);
 }
 
+
+void DayAsmPrinter::lowerToMCInst(const MachineInstr *MI, MCInst &Out) {
+  Out.setOpcode(MI->getOpcode());
+
+  for (const MachineOperand &MO : MI->operands()) {
+    MCOperand MCOp;
+    lowerOperand(MO, MCOp);
+    Out.addOperand(MCOp);
+  }
+}
 
 static MCOperand lowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym,
                                     const AsmPrinter &AP) {
   MCContext &Ctx = AP.OutContext;
   unsigned Kind;
+  const MCSymbol *symbol = nullptr;
 
   switch (MO.getTargetFlags()) {
   default:
@@ -40,7 +55,22 @@ static MCOperand lowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym,
   case 0:
     Kind = 0;
     break;
+  case DayMCExpr::HI:
+    Kind = DayMCExpr::HI;
+    break;
+  case DayMCExpr::LO:
+    Kind = DayMCExpr::LO;
+    break;
   }
+
+  // if (MO.getType() == MachineOperand::MO_MachineBasicBlock) {
+  //   symbol = MO.getMBB()->getSymbol();
+  // } else if (MO.getType() == MachineOperand::MO_ExternalSymbol) {
+  //   symbol = GetExternalSymbolSymbol(MO.getSymbolName());
+  // }
+  // else {
+  //   symbol = getSymbol(MO.getGlobal());
+  // }
 
   const MCExpr *ME =
       MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, Ctx);
@@ -51,6 +81,8 @@ static MCOperand lowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym,
 
   return MCOperand::createExpr(ME);
 }
+
+
 
 bool DayAsmPrinter::lowerOperand(const MachineOperand &MO,
                                    MCOperand &MCOp) const {
@@ -72,26 +104,14 @@ bool DayAsmPrinter::lowerOperand(const MachineOperand &MO,
   case MachineOperand::MO_MachineBasicBlock:
     MCOp = lowerSymbolOperand(MO, MO.getMBB()->getSymbol(), *this);
     break;
-  // case MachineOperand::MO_GlobalAddress:
-  //   MCOp = lowerSymbolOperand(MO, getSymbolPreferLocal(*MO.getGlobal()), *this);
-  //   break;
-  // case MachineOperand::MO_BlockAddress:
-  //   MCOp = lowerSymbolOperand(MO, GetBlockAddressSymbol(MO.getBlockAddress()),
-  //                             *this);
-  //   break;
-  // case MachineOperand::MO_ExternalSymbol:
-  //   MCOp = lowerSymbolOperand(MO, GetExternalSymbolSymbol(MO.getSymbolName()),
-  //                             *this);
-  //   break;
-  // case MachineOperand::MO_ConstantPoolIndex:
-  //   MCOp = lowerSymbolOperand(MO, GetCPISymbol(MO.getIndex()), *this);
-  //   break;
-  // case MachineOperand::MO_JumpTableIndex:
-  //   MCOp = lowerSymbolOperand(MO, GetJTISymbol(MO.getIndex()), *this);
-  //   break;
-  // case MachineOperand::MO_MCSymbol:
-  //   MCOp = lowerSymbolOperand(MO, MO.getMCSymbol(), *this);
-  //   break;
+  case MachineOperand::MO_GlobalAddress:
+    MCOp = lowerSymbolOperand(MO, getSymbolPreferLocal(*MO.getGlobal()), *this);
+    break;
+  case MachineOperand::MO_ExternalSymbol:
+    MCOp = lowerSymbolOperand(MO, GetExternalSymbolSymbol(MO.getSymbolName()),
+                              *this);
+    break;
+  
   }
   return true;
 }

@@ -39,11 +39,8 @@ for.body.lr.ph:                                   ; preds = %div_for.body.lr.ph
 div_for.cond.cleanup:                             ; preds = %for.cond.preheader
   br label %for.cond.cleanup
 
-div_for.cond.cleanup1:                            ; preds = %for.body
-  br label %for.cond.cleanup
-
-for.cond.cleanup:                                 ; preds = %div_for.cond.cleanup1, %div_for.cond.cleanup
-  %sum.0.lcssa = phi float [ 0.000000e+00, %div_for.cond.cleanup ], [ %6, %div_for.cond.cleanup1 ]
+for.cond.cleanup:                                 ; preds = %div_for.cond.cleanup, %for.body
+  %sum.0.lcssa = phi float [ 0.000000e+00, %div_for.cond.cleanup ], [ %6, %for.body ]
   %mul13 = mul nsw i32 %N, %conv
   %add14 = add nsw i32 %mul13, %conv2
   %idxprom15 = sext i32 %add14 to i64
@@ -51,12 +48,9 @@ for.cond.cleanup:                                 ; preds = %div_for.cond.cleanu
   store float %sum.0.lcssa, ptr %arrayidx16, align 4, !tbaa !12
   br label %if.end
 
-div_for.body:                                     ; preds = %for.body
-  br label %for.body
-
-for.body:                                         ; preds = %div_for.body, %for.body.lr.ph
-  %indvars.iv = phi i64 [ 0, %for.body.lr.ph ], [ %indvars.iv.next, %div_for.body ]
-  %sum.029 = phi float [ 0.000000e+00, %for.body.lr.ph ], [ %6, %div_for.body ]
+for.body:                                         ; preds = %for.body, %for.body.lr.ph
+  %indvars.iv = phi i64 [ 0, %for.body.lr.ph ], [ %indvars.iv.next, %for.body ]
+  %sum.029 = phi float [ 0.000000e+00, %for.body.lr.ph ], [ %6, %for.body ]
   %gep = getelementptr float, ptr %invariant.gep, i64 %indvars.iv
   %3 = load float, ptr %gep, align 4, !tbaa !12
   %4 = mul nsw i64 %indvars.iv, %1
@@ -65,7 +59,7 @@ for.body:                                         ; preds = %div_for.body, %for.
   %6 = tail call float @llvm.fmuladd.f32(float %3, float %5, float %sum.029)
   %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
   %exitcond.not = icmp eq i64 %indvars.iv.next, %wide.trip.count
-  br i1 %exitcond.not, label %div_for.cond.cleanup1, label %div_for.body
+  br i1 %exitcond.not, label %for.cond.cleanup, label %for.body
 
 div_if.end:                                       ; preds = %entry
   br label %if.end

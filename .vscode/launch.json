@@ -1,13 +1,50 @@
-    {
+    // {
+    //     "version": "0.2.0",
+    //     "configurations": [
+    //         {
+    //             "name": "Debug llc for DayCore",
+    //             "type": "cppdbg",
+    //             "request": "launch",
+    //             "program": "${workspaceFolder}/build/bin/llc",
+    //             "args": [
+    //                 "-march=day",
+    //                 "-O0",
+    //                 "-filetype=asm",
+    //                 // "-print-before=asm-printer",
+    //                 "${workspaceFolder}/day_test_doc/src/bbb.ll",
+    //                 "-o",
+    //                 // "-",
+    //                 "${workspaceFolder}/day_test_doc/src/day_main.s",
+    //                 // "--debug",
+    //                 // "--asm-show-inst"
+    //             ],
+    //             "stopAtEntry": false,
+    //             "cwd": "${workspaceFolder}",
+    //             "environment": [],
+    //             "externalConsole": false,
+    //             "MIMode": "gdb",
+    //             "setupCommands": [
+    //                 {
+    //                     "description": "Enable pretty-printing for gdb",
+    //                     "text": "-enable-pretty-printing",
+    //                     "ignoreFailures": true
+    //                 }
+    //             ]
+    //         }
+    //     ]
+    // }
+
+
+        {
         "version": "0.2.0",
         "configurations": [
             {
-                "name": "Debug llc for DayCore",
+                "name": "opt RISCV GPU",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/build/bin/llc",
+                "program": "${workspaceFolder}/build/bin/opt",
                 "args": [
-                    "-march=day",
+                    "-mtriple=riscv64-unknown-unknown",
                     "-O0",
                     "-filetype=asm",
                     // "-print-before=asm-printer",

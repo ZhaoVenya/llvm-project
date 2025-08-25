@@ -2,21 +2,47 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/Analysis/LoopInfo.h"
+#include "llvm/Analysis/LoopPass.h"
 
 using namespace llvm;
 
+
+bool RISCVGPUDivergence::isLoopBr(BranchInst *BI, LoopInfo &LI){
+    return true;
+}
+
+
 bool RISCVGPUDivergence::runOnFunction(Function &F) {
     bool changed = false;
+
+    // 首先获取循环信息
+    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
 
     // 收集所有需要处理的分支指令
     SmallVector<BranchInst *, 8> BranchesToProcess;
     
     for (auto &BB : F) {
         Instruction *Terminator = BB.getTerminator();
-        if (BranchInst *BrInst = dyn_cast<BranchInst>(Terminator)) {
-            if (BrInst->isConditional()) {
-                BranchesToProcess.push_back(BrInst);
+        BranchInst *BrInst = dyn_cast<BranchInst>(Terminator);
+
+        if (BrInst!=nullptr && BrInst->isConditional()) {
+            
+            if (LI.getLoopFor(&BB) != nullptr) {
+                // 这个基本块属于一个循环，跳过处理
+                continue;
             }
+            
+            // 进一步检查：确保这不是一个循环的回边
+            BasicBlock *TrueDest = BrInst->getSuccessor(0);
+            BasicBlock *FalseDest = BrInst->getSuccessor(1);
+            
+            // 如果分支的目标是循环头，则很可能是循环控制分支
+            if (LI.isLoopHeader(TrueDest) || LI.isLoopHeader(FalseDest)) {
+                continue;
+            }
+            
+            BranchesToProcess.push_back(BrInst);
         }
     }
 
@@ -64,6 +90,12 @@ bool RISCVGPUDivergence::runOnFunction(Function &F) {
     }
     
     return changed;
+}
+
+
+void RISCVGPUDivergence::getAnalysisUsage(AnalysisUsage &AU)const{
+    AU.addRequired<LoopInfoWrapperPass>();
+    AU.setPreservesAll();
 }
 
 char RISCVGPUDivergence::ID = 0;

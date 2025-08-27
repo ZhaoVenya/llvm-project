@@ -72,6 +72,27 @@ let TargetPrefix = "riscv" in {
   //   ptr addr, ixlen cmpval, ixlen newval, ixlen mask, ixlenimm ordering)
   defm int_riscv_masked_cmpxchg : MaskedAtomicRMWFiveArgIntrinsics;
 
+  ///////////////////////////////////////////////////////////////////////
+  // riscv gpu extension. zhaowenya
+  def int_riscv_gpu_uniform : Intrinsic<[llvm_any_ty], [llvm_any_ty], [IntrNoMem]>;
+
+  class RISCVGPUIntrinsicsImpl<LLVMType itype>
+      : Intrinsic<[itype], [], [IntrNoMem, IntrWillReturn]>;
+  
+  multiclass RISCVGPUIntrinsics {
+    def _i32 : RISCVGPUIntrinsicsImpl<llvm_i32_ty>;
+    def _i64 : RISCVGPUIntrinsicsImpl<llvm_i64_ty>;
+  }
+
+  defm int_riscv_gpu_tmask : RISCVGPUIntrinsics;
+  defm int_riscv_gpu_tid : RISCVGPUIntrinsics;
+  defm int_riscv_gpu_wid : RISCVGPUIntrinsics;
+  defm int_riscv_gpu_cid : RISCVGPUIntrinsics;
+  defm int_riscv_gpu_nt : RISCVGPUIntrinsics;
+  defm int_riscv_gpu_nw : RISCVGPUIntrinsics;
+  defm int_riscv_gpu_nc : RISCVGPUIntrinsics;
+  ///////////////////////////////////////////////////////////////////////
+
 } // TargetPrefix = "riscv"
 
 //===----------------------------------------------------------------------===//

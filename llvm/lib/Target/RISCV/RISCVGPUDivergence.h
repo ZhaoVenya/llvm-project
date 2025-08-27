@@ -25,8 +25,6 @@ public:
 
     StringRef getPassName() const override;
 
-    bool isLoopBr(BranchInst *BI, LoopInfo &LI);
-
     bool runOnFunction(Function &F) override;
 
     void getAnalysisUsage(AnalysisUsage &AU)const override;

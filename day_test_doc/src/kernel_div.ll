@@ -1,4 +1,4 @@
-; ModuleID = 'kernel.ll'
+; ModuleID = '/home/zhaowenya/桌面/llvm-project/day_test_doc/src/kernel.ll'
 source_filename = "kernel.cl"
 target datalayout = "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128"
 target triple = "riscv64-unknown-unknown"
@@ -27,7 +27,7 @@ if.then:                                          ; preds = %uni_vector_max_0
   %add = fadd float %mul, %4
   br label %if.end
 
-if.else:                                          ; preds = %uni_vector_max_0, %div_vector_max_0
+if.else:                                          ; preds = %div_vector_max_0, %uni_vector_max_0
   %sub = fadd float %1, -1.000000e+00
   br label %if.end
 

@@ -52,6 +52,17 @@ BasicBlock* findCommonDestination(BasicBlock *TrueDest, BasicBlock *FalseDest) {
 }
 
 
+Value* getValueBeforeTerminator(BasicBlock *BB) {
+    // 获取基本块的终止指令
+    Instruction *Terminator = BB->getTerminator();
+    
+    // 如果终止指令前面有指令，返回最后一条指令
+    if (Terminator->getPrevNode()) {
+        return Terminator->getPrevNode();
+    }
+    
+    return nullptr; // 基本块为空或只有终止指令
+}
 
 
 bool RISCVGPUDivergence::runOnFunction(Function &F) {
@@ -91,12 +102,13 @@ bool RISCVGPUDivergence::runOnFunction(Function &F) {
     SmallVector<BasicBlock *, 8> DivDestList;
     SmallVector<BasicBlock *, 8> OrgDestList1st;
     SmallVector<BasicBlock *, 8> OrgDestList2nd;
+    SmallVector<BranchInst *, 8> eraseBrList;
+    Module *M = F.getParent();
 
     // 处理每个条件分支
     for (auto *BrInst : BranchesToProcess) {
 
         IRBuilder<> builder(BrInst);
-        Module *M = F.getParent();
         Type *VoidTy = builder.getVoidTy();
         Type *Int1Ty = builder.getInt1Ty();
         Type *Int32Ty = builder.getInt32Ty();
@@ -163,7 +175,8 @@ bool RISCVGPUDivergence::runOnFunction(Function &F) {
         Value *TorF = UniBuilder.CreateCall(riscv_gpu_TorF_get,{tMask});
         UniBuilder.CreateCondBr(TorF, OriginalTrueDest, OriginalFalseDest);
         ///////////////////////////////////////////////////////////////////////////////////
-        BrInst->eraseFromParent(); //// 删除原有的跳转分支
+        // BrInst->eraseFromParent(); //// 删除原有的跳转分支
+        eraseBrList.push_back(BrInst);
         br_num++;
         
     }
@@ -178,10 +191,54 @@ bool RISCVGPUDivergence::runOnFunction(Function &F) {
         OrgDestList2nd.pop_back();
 
         BasicBlock *BrTermBB = findCommonDestination(OrgBranch1st, OrgBranch2nd);
-        DivBuilder.CreateBr(OrgBranch2nd); 
+
+        for (Instruction &OrigInst : *OrgBranch1st) {
+            if(OrigInst.isTerminator()){
+                break;
+            }
+            Instruction *ClonedInst = OrigInst.clone();
+            DivBuilder.Insert(ClonedInst);
+            VMap[&OrigInst] = ClonedInst;
+        }
+
+        Type *VoidTy = DivBuilder.getVoidTy();
+        // Type *Int32Ty = DivBuilder.getInt32Ty();
+
+        FunctionType *FuncTy1 = FunctionType::get(VoidTy, {}, false);
+        Function *riscv_gpu_tmask_reverse = Function::Create(FuncTy1, Function::ExternalLinkage, "reverse_riscv_gpu_tmask", M);
+
+        DivBuilder.CreateCall(riscv_gpu_tmask_reverse);
+
+        for (Instruction &OrigInst : *OrgBranch2nd) {
+            Instruction *ClonedInst = OrigInst.clone();
+            DivBuilder.Insert(ClonedInst);
+            VMap[&OrigInst] = ClonedInst;
+        }
+        
+        // DivBuilder.CreateBr(BrTermBB); 
+
+        for (Instruction &I : *DivBB) {
+            RemapInstruction(&I, VMap, RF_IgnoreMissingLocals, nullptr);
+        }
+
+        
+        Value *sss = getValueBeforeTerminator(DivBB);
+
+        for(Instruction &I: *BrTermBB){
+            if(PHINode *PN = dyn_cast<PHINode>(&I)){
+                PN->addIncoming(sss, DivBB);
+            }
+        }
+        
     }
 
-    changed = true;
+    for(auto *br_inst : eraseBrList){
+        br_inst->eraseFromParent();
+        changed = true;
+    }        
+    
+    unsigned kkkk = 0;
+    kkkk++;
     
     return changed;
 }
